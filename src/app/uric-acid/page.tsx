@@ -44,18 +44,18 @@ const RechartsLineChart = dynamic(
               data={data}
               margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 11, fill: '#999' }}
+                tick={{ fontSize: 11, fill: 'var(--color-text-secondary)' }}
                 tickLine={false}
-                axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                axisLine={{ stroke: 'var(--color-border)' }}
               />
               <YAxis
                 domain={['auto', 'auto']}
-                tick={{ fontSize: 11, fill: '#999' }}
+                tick={{ fontSize: 11, fill: 'var(--color-text-secondary)' }}
                 tickLine={false}
-                axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                axisLine={{ stroke: 'var(--color-border)' }}
                 unit=" "
               />
               <ReferenceLine
@@ -72,7 +72,7 @@ const RechartsLineChart = dynamic(
               <Tooltip
                 contentStyle={{
                   background: 'var(--color-surface)',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: 8,
                   fontSize: 13,
                   color: 'var(--color-text)',
@@ -94,12 +94,12 @@ const RechartsLineChart = dynamic(
                       cy={cy}
                       r={5}
                       fill={payload.color}
-                      stroke="#fff"
+                      stroke="var(--color-surface)"
                       strokeWidth={2}
                     />
                   );
                 }}
-                activeDot={{ r: 7, stroke: '#fff', strokeWidth: 2 }}
+                activeDot={{ r: 7, stroke: 'var(--color-surface)', strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -232,20 +232,22 @@ export default function UricAcidPage() {
 
   if (readings.length === 0 && !showModal) {
     return (
-      <div style={s.container}>
-        <header style={s.header}>
-          <ChartIcon size={28} color="#6366f1" />
-          <h1 style={s.title}>Uric Acid Tracker</h1>
-        </header>
-        <div style={s.emptyState}>
-          <div style={s.emptyIcon}>
-            <ChartIcon size={48} color="#555" />
+      <div className="ua-container">
+        <header className="ua-header">
+          <div className="ua-header-left">
+            <ChartIcon size={28} color="#6366f1" />
+            <h1 className="ua-title">Uric Acid Tracker</h1>
           </div>
-          <h2 style={s.emptyTitle}>No Readings Yet</h2>
-          <p style={s.emptyText}>
+        </header>
+        <div className="ua-empty-state">
+          <div className="ua-empty-icon">
+            <ChartIcon size={48} />
+          </div>
+          <h2 className="ua-empty-title">No Readings Yet</h2>
+          <p className="ua-empty-text">
             Start tracking your uric acid levels to monitor your gout management progress.
           </p>
-          <button style={s.emptyButton} onClick={openModal}>
+          <button className="ua-empty-button" onClick={openModal}>
             <PlusIcon size={18} color="#fff" />
             <span>Add Your First Reading</span>
           </button>
@@ -258,11 +260,11 @@ export default function UricAcidPage() {
 
   function renderModal() {
     return (
-      <div style={s.overlay} onClick={() => setShowModal(false)}>
-        <div style={s.modal} onClick={(e) => e.stopPropagation()}>
-          <h2 style={s.modalTitle}>Add Reading</h2>
+      <div className="ua-modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="ua-modal" onClick={(e) => e.stopPropagation()}>
+          <h2 className="ua-modal-title">Add Reading</h2>
 
-          <label style={s.label}>Uric Acid Level (mg/dL)</label>
+          <label className="ua-label">Uric Acid Level (mg/dL)</label>
           <input
             type="number"
             step="0.1"
@@ -270,36 +272,33 @@ export default function UricAcidPage() {
             placeholder="e.g., 5.8"
             value={formValue}
             onChange={(e) => setFormValue(e.target.value)}
-            style={s.input}
+            className="ua-input"
             autoFocus
           />
 
-          <label style={s.label}>Date</label>
+          <label className="ua-label">Date</label>
           <input
             type="date"
             value={formDate}
             onChange={(e) => setFormDate(e.target.value)}
-            style={s.input}
+            className="ua-input"
           />
 
-          <label style={s.label}>Notes (optional)</label>
+          <label className="ua-label">Notes (optional)</label>
           <textarea
             placeholder="Any notes about this reading..."
             value={formNotes}
             onChange={(e) => setFormNotes(e.target.value)}
-            style={s.textarea}
+            className="ua-textarea"
             rows={3}
           />
 
-          <div style={s.modalActions}>
-            <button style={s.cancelBtn} onClick={() => setShowModal(false)}>
+          <div className="ua-modal-actions">
+            <button className="ua-cancel-btn" onClick={() => setShowModal(false)}>
               Cancel
             </button>
             <button
-              style={{
-                ...s.saveBtn,
-                opacity: !formValue || parseFloat(formValue) <= 0 ? 0.5 : 1,
-              }}
+              className="ua-save-btn"
               onClick={handleSave}
               disabled={!formValue || parseFloat(formValue) <= 0}
             >
@@ -314,21 +313,23 @@ export default function UricAcidPage() {
   // ─── Main Render ────────────────────────────────────────────────────────
 
   return (
-    <div style={s.container}>
-      <header style={s.header}>
-        <div style={s.headerLeft}>
+    <div className="ua-container">
+      <header className="ua-header">
+        <div className="ua-header-left">
           <ChartIcon size={28} color="#6366f1" />
-          <h1 style={s.title}>Uric Acid Tracker</h1>
+          <h1 className="ua-title">Uric Acid Tracker</h1>
         </div>
       </header>
 
       {/* Target Display */}
-      <div style={s.targetCard}>
-        <div style={s.targetRow}>
+      <div className="ua-target-card">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={s.targetLabel}>Goal: Below {URIC_ACID_TARGET} mg/dL</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#22c55e', marginBottom: 4 }}>
+              Goal: Below {URIC_ACID_TARGET} mg/dL
+            </div>
             {stats && (
-              <div style={s.targetSub}>
+              <div style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
                 Current Level:{' '}
                 <span style={{ color: getValueColor(stats.current), fontWeight: 700 }}>
                   {stats.current} mg/dL
@@ -339,10 +340,16 @@ export default function UricAcidPage() {
           </div>
           {stats && (
             <div
+              className="ua-value-badge"
               style={{
-                ...s.currentBadge,
                 background: getValueBg(stats.current),
                 color: getValueColor(stats.current),
+                fontSize: 22,
+                fontWeight: 800,
+                padding: '8px 14px',
+                minWidth: 60,
+                textAlign: 'center',
+                borderRadius: 12,
               }}
             >
               {stats.current}
@@ -352,17 +359,14 @@ export default function UricAcidPage() {
       </div>
 
       {/* Trend Chart */}
-      <div style={s.chartCard}>
-        <div style={s.chartHeader}>
-          <h2 style={s.sectionTitle}>Trend</h2>
-          <div style={s.rangeButtons}>
+      <div className="ua-chart-card">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, paddingLeft: 8, paddingRight: 4 }}>
+          <h2 className="ua-section-title">Trend</h2>
+          <div style={{ display: 'flex', gap: 4 }}>
             {(['1M', '3M', '6M', '1Y', 'All'] as TimeRange[]).map((r) => (
               <button
                 key={r}
-                style={{
-                  ...s.rangeBtn,
-                  ...(timeRange === r ? s.rangeBtnActive : {}),
-                }}
+                className={`ua-range-btn ${timeRange === r ? 'ua-range-btn-active' : ''}`}
                 onClick={() => setTimeRange(r)}
               >
                 {r}
@@ -381,56 +385,62 @@ export default function UricAcidPage() {
 
       {/* Stats Row */}
       {stats && (
-        <div style={s.statsRow}>
-          <div style={s.statCard}>
-            <div style={s.statValue}>
+        <div className="ua-stats-row">
+          <div className="ua-stat-card">
+            <div className="ua-stat-value">
               <span style={{ color: getValueColor(stats.current) }}>{stats.current}</span>
             </div>
-            <div style={s.statLabel}>Current</div>
+            <div className="ua-stat-label">Current</div>
           </div>
-          <div style={s.statCard}>
-            <div style={s.statValue}>
+          <div className="ua-stat-card">
+            <div className="ua-stat-value">
               <span style={{ color: getValueColor(stats.average) }}>{stats.average}</span>
             </div>
-            <div style={s.statLabel}>Average</div>
+            <div className="ua-stat-label">Average</div>
           </div>
-          <div style={s.statCard}>
-            <div style={s.statValue}>
+          <div className="ua-stat-card">
+            <div className="ua-stat-value">
               <span style={{ color: getValueColor(stats.highest) }}>{stats.highest}</span>
             </div>
-            <div style={s.statLabel}>Highest</div>
+            <div className="ua-stat-label">Highest</div>
           </div>
-          <div style={s.statCard}>
-            <div style={s.statValue}>
+          <div className="ua-stat-card">
+            <div className="ua-stat-value">
               <span style={{ color: getValueColor(stats.lowest) }}>{stats.lowest}</span>
             </div>
-            <div style={s.statLabel}>Lowest</div>
+            <div className="ua-stat-label">Lowest</div>
           </div>
         </div>
       )}
 
       {/* Reading History */}
-      <div style={s.historySection}>
-        <h2 style={s.sectionTitle}>Reading History</h2>
-        <div style={s.historyList}>
+      <div className="ua-history-section">
+        <h2 className="ua-section-title">Reading History</h2>
+        <div className="ua-history-list">
           {readings.map((r) => (
-            <div key={r.id} style={s.historyItem}>
-              <div style={s.historyLeft}>
-                <div style={s.historyDate}>{formatDate(r.date)}</div>
-                {r.notes && <div style={s.historyNotes}>{r.notes}</div>}
+            <div key={r.id} className="ua-history-item">
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text)' }}>
+                  {formatDate(r.date)}
+                </div>
+                {r.notes && (
+                  <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {r.notes}
+                  </div>
+                )}
               </div>
-              <div style={s.historyRight}>
-                <div
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <span
+                  className="ua-value-badge"
                   style={{
-                    ...s.valueBadge,
                     background: getValueBg(r.value),
                     color: getValueColor(r.value),
                   }}
                 >
                   {r.value} mg/dL
-                </div>
+                </span>
                 <button
-                  style={s.deleteBtn}
+                  className="ua-delete-btn"
                   onClick={() => handleDelete(r.id)}
                   aria-label="Delete reading"
                 >
@@ -443,7 +453,7 @@ export default function UricAcidPage() {
       </div>
 
       {/* FAB */}
-      <button style={s.fab} onClick={openModal} aria-label="Add Reading">
+      <button className="ua-fab" onClick={openModal} aria-label="Add Reading">
         <PlusIcon size={24} color="#fff" />
       </button>
 
@@ -452,335 +462,3 @@ export default function UricAcidPage() {
     </div>
   );
 }
-
-// ─── Styles ─────────────────────────────────────────────────────────────────
-
-const s: Record<string, React.CSSProperties> = {
-  container: {
-    minHeight: '100vh',
-    background: 'var(--color-bg)',
-    color: 'var(--color-text)',
-    paddingBottom: 100,
-    fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '16px 20px 8px',
-    position: 'sticky',
-    top: 0,
-    background: 'var(--color-bg)',
-    zIndex: 10,
-    gap: 10,
-  },
-  headerLeft: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 700,
-    letterSpacing: '-0.02em',
-  },
-
-  // Target
-  targetCard: {
-    margin: '12px 16px',
-    padding: '16px 20px',
-    background: 'rgba(255,255,255,0.04)',
-    borderRadius: 16,
-    border: '1px solid rgba(255,255,255,0.06)',
-  },
-  targetRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  targetLabel: {
-    fontSize: 15,
-    fontWeight: 600,
-    color: '#22c55e',
-    marginBottom: 4,
-  },
-  targetSub: {
-    fontSize: 13,
-    color: 'var(--color-text-secondary)',
-  },
-  currentBadge: {
-    fontSize: 22,
-    fontWeight: 800,
-    borderRadius: 12,
-    padding: '8px 14px',
-    minWidth: 60,
-    textAlign: 'center' as const,
-  },
-
-  // Chart
-  chartCard: {
-    margin: '12px 16px',
-    padding: '16px 12px 8px',
-    background: 'rgba(255,255,255,0.04)',
-    borderRadius: 16,
-    border: '1px solid rgba(255,255,255,0.06)',
-  },
-  chartHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    paddingLeft: 8,
-    paddingRight: 4,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 600,
-    color: 'var(--color-text)',
-  },
-  rangeButtons: {
-    display: 'flex',
-    gap: 4,
-  },
-  rangeBtn: {
-    padding: '4px 10px',
-    borderRadius: 8,
-    border: 'none',
-    background: 'transparent',
-    color: 'var(--color-text-secondary)',
-    fontSize: 12,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  rangeBtnActive: {
-    background: 'rgba(99,102,241,0.2)',
-    color: '#818cf8',
-  },
-
-  // Stats
-  statsRow: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: 10,
-    margin: '12px 16px',
-  },
-  statCard: {
-    background: 'rgba(255,255,255,0.04)',
-    borderRadius: 12,
-    padding: '14px 8px',
-    textAlign: 'center' as const,
-    border: '1px solid rgba(255,255,255,0.06)',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 700,
-  },
-  statLabel: {
-    fontSize: 11,
-    color: 'var(--color-text-secondary)',
-    marginTop: 4,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.04em',
-  },
-
-  // History
-  historySection: {
-    margin: '20px 16px',
-  },
-  historyList: {
-    marginTop: 12,
-    maxHeight: 400,
-    overflowY: 'auto' as const,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 8,
-  },
-  historyItem: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '12px 16px',
-    background: 'rgba(255,255,255,0.04)',
-    borderRadius: 12,
-    border: '1px solid rgba(255,255,255,0.06)',
-  },
-  historyLeft: {
-    flex: 1,
-    minWidth: 0,
-  },
-  historyDate: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: 'var(--color-text)',
-  },
-  historyNotes: {
-    fontSize: 12,
-    color: 'var(--color-text-secondary)',
-    marginTop: 2,
-    whiteSpace: 'nowrap' as const,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  historyRight: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    flexShrink: 0,
-  },
-  valueBadge: {
-    fontSize: 13,
-    fontWeight: 700,
-    padding: '4px 10px',
-    borderRadius: 8,
-  },
-  deleteBtn: {
-    background: 'none',
-    border: 'none',
-    color: 'var(--color-text-tertiary)',
-    fontSize: 20,
-    cursor: 'pointer',
-    padding: '4px 6px',
-    lineHeight: 1,
-  },
-
-  // FAB
-  fab: {
-    position: 'fixed' as const,
-    bottom: 90,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    border: 'none',
-    boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    zIndex: 20,
-  },
-
-  // Modal
-  overlay: {
-    position: 'fixed' as const,
-    inset: 0,
-    background: 'rgba(0,0,0,0.7)',
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    zIndex: 100,
-  },
-  modal: {
-    background: 'var(--color-surface)',
-    borderRadius: '20px 20px 0 0',
-    padding: '24px 20px 32px',
-    width: '100%',
-    maxWidth: 480,
-    maxHeight: '85vh',
-    overflowY: 'auto' as const,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 700,
-    marginBottom: 20,
-    color: 'var(--color-text)',
-  },
-  label: {
-    display: 'block',
-    fontSize: 13,
-    fontWeight: 600,
-    color: 'var(--color-text-secondary)',
-    marginBottom: 6,
-    marginTop: 14,
-  },
-  input: {
-    width: '100%',
-    padding: '12px 14px',
-    borderRadius: 10,
-    border: '1px solid rgba(255,255,255,0.1)',
-    background: 'rgba(255,255,255,0.06)',
-    color: 'var(--color-text)',
-    fontSize: 15,
-    outline: 'none',
-  },
-  textarea: {
-    width: '100%',
-    padding: '12px 14px',
-    borderRadius: 10,
-    border: '1px solid rgba(255,255,255,0.1)',
-    background: 'rgba(255,255,255,0.06)',
-    color: 'var(--color-text)',
-    fontSize: 15,
-    outline: 'none',
-    resize: 'vertical' as const,
-    fontFamily: 'inherit',
-  },
-  modalActions: {
-    display: 'flex',
-    gap: 10,
-    marginTop: 24,
-  },
-  cancelBtn: {
-    flex: 1,
-    padding: '12px 0',
-    borderRadius: 10,
-    border: '1px solid rgba(255,255,255,0.1)',
-    background: 'transparent',
-    color: 'var(--color-text)',
-    fontSize: 15,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  saveBtn: {
-    flex: 1,
-    padding: '12px 0',
-    borderRadius: 10,
-    border: 'none',
-    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    color: 'var(--color-text)',
-    fontSize: 15,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-
-  // Empty
-  emptyState: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '80px 32px',
-    textAlign: 'center' as const,
-  },
-  emptyIcon: {
-    marginBottom: 16,
-    opacity: 0.5,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: 'var(--color-text)',
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: 'var(--color-text-secondary)',
-    maxWidth: 280,
-    lineHeight: 1.5,
-    marginBottom: 24,
-  },
-  emptyButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '12px 24px',
-    borderRadius: 12,
-    border: 'none',
-    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    color: 'var(--color-text)',
-    fontSize: 15,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-};

@@ -10,365 +10,6 @@ import { getSubscriptionStatus } from '@/lib/storage';
 import { useTheme } from '@/hooks/useTheme';
 import { SettingsIcon, CrownIcon, ShieldIcon } from '@/components/icons';
 
-// ─── Styles ─────────────────────────────────────────────────────────────────
-
-const s = {
-  page: {
-    minHeight: '100vh',
-    padding: '16px',
-    paddingBottom: '120px',
-    maxWidth: '600px',
-    margin: '0 auto',
-  } as React.CSSProperties,
-
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '24px',
-  } as React.CSSProperties,
-
-  title: {
-    fontSize: '28px',
-    fontWeight: '700',
-  } as React.CSSProperties,
-
-  card: {
-    background: '#f9fafb',
-    borderRadius: '14px',
-    padding: '18px',
-    marginBottom: '16px',
-    border: '1px solid #e5e7eb',
-  } as React.CSSProperties,
-
-  cardTitle: {
-    fontSize: '16px',
-    fontWeight: '700',
-    marginBottom: '16px',
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px',
-    color: '#6b7280',
-  } as React.CSSProperties,
-
-  fieldGroup: {
-    marginBottom: '18px',
-  } as React.CSSProperties,
-
-  label: {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: '600',
-    marginBottom: '8px',
-  } as React.CSSProperties,
-
-  radioGroup: {
-    display: 'flex',
-    gap: '10px',
-    flexWrap: 'wrap' as const,
-  } as React.CSSProperties,
-
-  radioLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '8px 14px',
-    borderRadius: '10px',
-    border: '1px solid #d1d5db',
-    fontSize: '14px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-  } as React.CSSProperties,
-
-  radioLabelActive: {
-    background: '#eff6ff',
-    borderColor: '#1a56db',
-    color: '#1a56db',
-    fontWeight: '600',
-  } as React.CSSProperties,
-
-  radioInput: {
-    display: 'none',
-  } as React.CSSProperties,
-
-  chipContainer: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: '8px',
-  } as React.CSSProperties,
-
-  chip: {
-    padding: '6px 14px',
-    borderRadius: '16px',
-    border: '1px solid #d1d5db',
-    fontSize: '13px',
-    cursor: 'pointer',
-    background: 'transparent',
-    transition: 'all 0.2s',
-  } as React.CSSProperties,
-
-  chipActive: {
-    background: '#1a56db',
-    color: '#ffffff',
-    borderColor: '#1a56db',
-  } as React.CSSProperties,
-
-  tagInputRow: {
-    display: 'flex',
-    gap: '8px',
-    marginBottom: '10px',
-  } as React.CSSProperties,
-
-  tagInput: {
-    flex: 1,
-    padding: '8px 12px',
-    borderRadius: '10px',
-    border: '1px solid #d1d5db',
-    fontSize: '14px',
-    outline: 'none',
-  } as React.CSSProperties,
-
-  tagAddBtn: {
-    padding: '8px 16px',
-    borderRadius: '10px',
-    background: '#1a56db',
-    color: '#ffffff',
-    border: 'none',
-    fontWeight: '600',
-    fontSize: '14px',
-    cursor: 'pointer',
-  } as React.CSSProperties,
-
-  tagList: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: '6px',
-  } as React.CSSProperties,
-
-  tag: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    padding: '4px 10px',
-    borderRadius: '12px',
-    background: '#e5e7eb',
-    fontSize: '13px',
-  } as React.CSSProperties,
-
-  tagRemove: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '16px',
-    lineHeight: 1,
-    color: '#6b7280',
-    padding: '0 2px',
-  } as React.CSSProperties,
-
-  rangeRow: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '6px',
-  } as React.CSSProperties,
-
-  rangeValue: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: '#1a56db',
-  } as React.CSSProperties,
-
-  rangeInput: {
-    width: '100%',
-    accentColor: '#1a56db',
-    height: '6px',
-  } as React.CSSProperties,
-
-  rangeLabels: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '12px',
-    color: '#9ca3af',
-  } as React.CSSProperties,
-
-  toggleRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '12px 0',
-    borderBottom: '1px solid #f3f4f6',
-  } as React.CSSProperties,
-
-  toggleLabel: {
-    fontSize: '15px',
-    fontWeight: '500',
-  } as React.CSSProperties,
-
-  toggleSwitch: {
-    position: 'relative' as const,
-    width: '48px',
-    height: '28px',
-    borderRadius: '14px',
-    background: '#d1d5db',
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-    border: 'none',
-    padding: 0,
-  } as React.CSSProperties,
-
-  toggleSwitchActive: {
-    background: '#1a56db',
-  } as React.CSSProperties,
-
-  toggleKnob: {
-    position: 'absolute' as const,
-    top: '2px',
-    left: '2px',
-    width: '24px',
-    height: '24px',
-    borderRadius: '12px',
-    background: '#ffffff',
-    transition: 'transform 0.2s',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-  } as React.CSSProperties,
-
-  toggleKnobActive: {
-    transform: 'translateX(20px)',
-  } as React.CSSProperties,
-
-  subscriptionBadge: {
-    display: 'inline-block',
-    padding: '4px 12px',
-    borderRadius: '8px',
-    fontSize: '13px',
-    fontWeight: '600',
-    marginBottom: '12px',
-  } as React.CSSProperties,
-
-  btnRow: {
-    display: 'flex',
-    gap: '10px',
-    flexWrap: 'wrap' as const,
-  } as React.CSSProperties,
-
-  btn: {
-    flex: 1,
-    padding: '12px 16px',
-    borderRadius: '10px',
-    border: '1px solid #d1d5db',
-    background: '#ffffff',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    textAlign: 'center' as const,
-    textDecoration: 'none',
-    transition: 'all 0.2s',
-    display: 'block',
-  } as React.CSSProperties,
-
-  btnPrimary: {
-    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-    color: '#ffffff',
-    border: 'none',
-  } as React.CSSProperties,
-
-  btnDanger: {
-    background: '#ffffff',
-    color: '#dc2626',
-    borderColor: '#dc2626',
-  } as React.CSSProperties,
-
-  link: {
-    display: 'block',
-    padding: '12px 0',
-    borderBottom: '1px solid #f3f4f6',
-    fontSize: '15px',
-    color: '#1a56db',
-    textDecoration: 'none',
-  } as React.CSSProperties,
-
-  versionText: {
-    fontSize: '13px',
-    color: '#9ca3af',
-    marginTop: '8px',
-  } as React.CSSProperties,
-
-  disclaimer: {
-    background: '#fef2f2',
-    border: '1px solid #fecaca',
-    borderRadius: '12px',
-    padding: '16px',
-    marginTop: '8px',
-  } as React.CSSProperties,
-
-  disclaimerTitle: {
-    fontSize: '14px',
-    fontWeight: '700',
-    color: '#dc2626',
-    marginBottom: '6px',
-  } as React.CSSProperties,
-
-  disclaimerText: {
-    fontSize: '13px',
-    color: '#991b1b',
-    lineHeight: '1.6',
-  } as React.CSSProperties,
-
-  // Confirmation modal
-  overlay: {
-    position: 'fixed' as const,
-    inset: 0,
-    background: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-    padding: '20px',
-  } as React.CSSProperties,
-
-  modal: {
-    background: '#ffffff',
-    borderRadius: '16px',
-    padding: '28px',
-    maxWidth: '360px',
-    width: '100%',
-    textAlign: 'center' as const,
-  } as React.CSSProperties,
-
-  modalTitle: {
-    fontSize: '20px',
-    fontWeight: '700',
-    marginBottom: '10px',
-  } as React.CSSProperties,
-
-  modalText: {
-    fontSize: '14px',
-    color: '#6b7280',
-    lineHeight: '1.6',
-    marginBottom: '20px',
-  } as React.CSSProperties,
-
-  modalBtnRow: {
-    display: 'flex',
-    gap: '10px',
-  } as React.CSSProperties,
-
-  modalBtn: {
-    flex: 1,
-    padding: '12px',
-    borderRadius: '10px',
-    border: '1px solid #d1d5db',
-    background: '#ffffff',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-  } as React.CSSProperties,
-
-  modalBtnDanger: {
-    background: '#dc2626',
-    color: '#ffffff',
-    border: 'none',
-  } as React.CSSProperties,
-};
-
 // ─── Toggle Component ───────────────────────────────────────────────────────
 
 function Toggle({
@@ -382,19 +23,9 @@ function Toggle({
     <button
       role="switch"
       aria-checked={checked}
-      style={{
-        ...s.toggleSwitch,
-        ...(checked ? s.toggleSwitchActive : {}),
-      }}
+      className={`toggle ${checked ? 'toggle-active' : ''}`}
       onClick={() => onChange(!checked)}
-    >
-      <span
-        style={{
-          ...s.toggleKnob,
-          ...(checked ? s.toggleKnobActive : {}),
-        }}
-      />
-    </button>
+    />
   );
 }
 
@@ -469,7 +100,6 @@ export default function SettingsPage() {
 
   const handleDarkModeToggle = () => {
     toggleTheme();
-    // The theme hook handles persistence; re-read the profile to stay in sync
     setTimeout(() => {
       setProfile(getUserProfile());
     }, 50);
@@ -493,7 +123,6 @@ export default function SettingsPage() {
   };
 
   const handleClearData = () => {
-    // Remove all goutcare keys from localStorage
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -502,8 +131,6 @@ export default function SettingsPage() {
       }
     }
     keysToRemove.forEach((key) => localStorage.removeItem(key));
-
-    // Reset profile state
     setProfile(getUserProfile());
     setShowClearModal(false);
   };
@@ -538,24 +165,18 @@ export default function SettingsPage() {
     return 'Free Plan';
   }
 
-  function getSubscriptionBadgeStyle(): React.CSSProperties {
-    if (subscriptionStatus.plan === 'free') {
-      return { background: '#f3f4f6', color: '#6b7280' };
-    }
-    if (subscriptionStatus.plan === 'trial') {
-      return { background: '#fef3c7', color: '#92400e' };
-    }
-    return { background: '#dcfce7', color: '#166534' };
+  function getSubscriptionBadgeClass(): string {
+    if (subscriptionStatus.plan === 'free') return 'settings-sub-badge settings-sub-free';
+    if (subscriptionStatus.plan === 'trial') return 'settings-sub-badge settings-sub-trial';
+    return 'settings-sub-badge settings-sub-premium';
   }
 
   // ── Loading state ─────────────────────────────────────────────────────
 
   if (!profile) {
     return (
-      <div style={s.page}>
-        <div style={{ textAlign: 'center', padding: '80px 0', color: '#9ca3af' }}>
-          Loading...
-        </div>
+      <div className="settings-page flex-center" style={{ minHeight: '60vh' }}>
+        <div className="spinner spinner-lg" />
       </div>
     );
   }
@@ -563,29 +184,26 @@ export default function SettingsPage() {
   // ── Render ────────────────────────────────────────────────────────────
 
   return (
-    <div style={s.page}>
+    <div className="settings-page">
       {/* Header */}
-      <div style={s.header}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
         <SettingsIcon size={28} />
-        <h1 style={s.title}>Settings</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 700 }}>Settings</h1>
       </div>
 
       {/* ── Profile Section ──────────────────────────────────────────────── */}
-      <div style={s.card}>
-        <h2 style={s.cardTitle}>Profile</h2>
+      <div className="settings-card">
+        <h2 className="settings-card-title">Profile</h2>
 
         {/* Gout Stage */}
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Gout Stage</label>
-          <div style={s.radioGroup}>
+        <div className="settings-field-group">
+          <label className="settings-label">Gout Stage</label>
+          <div className="settings-radio-group">
             {(['acute', 'intercritical', 'chronic'] as GoutStage[]).map(
               (stage) => (
                 <label
                   key={stage}
-                  style={{
-                    ...s.radioLabel,
-                    ...(profile.goutStage === stage ? s.radioLabelActive : {}),
-                  }}
+                  className={`settings-radio-label ${profile.goutStage === stage ? 'settings-radio-active' : ''}`}
                 >
                   <input
                     type="radio"
@@ -593,7 +211,7 @@ export default function SettingsPage() {
                     value={stage}
                     checked={profile.goutStage === stage}
                     onChange={() => handleStageChange(stage)}
-                    style={s.radioInput}
+                    style={{ display: 'none' }}
                   />
                   {stage.charAt(0).toUpperCase() + stage.slice(1)}
                 </label>
@@ -603,18 +221,15 @@ export default function SettingsPage() {
         </div>
 
         {/* Current Medications */}
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Current Medications</label>
-          <div style={s.chipContainer}>
+        <div className="settings-field-group">
+          <label className="settings-label">Current Medications</label>
+          <div className="settings-chip-container">
             {MEDICATION_PRESETS.map((med) => {
               const active = profile.medications.includes(med);
               return (
                 <button
                   key={med}
-                  style={{
-                    ...s.chip,
-                    ...(active ? s.chipActive : {}),
-                  }}
+                  className={`settings-chip ${active ? 'settings-chip-active' : ''}`}
                   onClick={() => handleMedicationToggle(med)}
                 >
                   {med}
@@ -625,36 +240,36 @@ export default function SettingsPage() {
         </div>
 
         {/* Dietary Restrictions */}
-        <div style={{ ...s.fieldGroup, marginBottom: 0 }}>
-          <label style={s.label}>Dietary Restrictions</label>
-          <div style={s.tagInputRow}>
+        <div className="settings-field-group">
+          <label className="settings-label">Dietary Restrictions</label>
+          <div className="settings-tag-input-row">
             <input
               type="text"
               value={newRestriction}
               onChange={(e) => setNewRestriction(e.target.value)}
               onKeyDown={handleRestrictionKeyDown}
               placeholder="Add restriction..."
-              style={s.tagInput}
+              className="settings-tag-input"
             />
-            <button style={s.tagAddBtn} onClick={handleAddRestriction}>
+            <button className="settings-tag-add-btn" onClick={handleAddRestriction}>
               Add
             </button>
           </div>
-          <div style={s.tagList}>
+          <div className="settings-tag-list">
             {profile.restrictions.map((tag) => (
-              <span key={tag} style={s.tag}>
+              <span key={tag} className="settings-tag">
                 {tag}
                 <button
-                  style={s.tagRemove}
+                  className="settings-tag-remove"
                   onClick={() => handleRemoveRestriction(tag)}
                   aria-label={`Remove ${tag}`}
                 >
-                  x
+                  &times;
                 </button>
               </span>
             ))}
             {profile.restrictions.length === 0 && (
-              <span style={{ fontSize: '13px', color: '#9ca3af' }}>
+              <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>
                 No restrictions added
               </span>
             )}
@@ -663,14 +278,14 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Goals Section ────────────────────────────────────────────────── */}
-      <div style={s.card}>
-        <h2 style={s.cardTitle}>Goals</h2>
+      <div className="settings-card">
+        <h2 className="settings-card-title">Goals</h2>
 
         {/* Daily Purine Target */}
-        <div style={s.fieldGroup}>
-          <label style={s.label}>Daily Purine Target</label>
-          <div style={s.rangeRow}>
-            <span style={s.rangeValue}>{profile.purineTarget}mg</span>
+        <div className="settings-field-group">
+          <label className="settings-label">Daily Purine Target</label>
+          <div className="settings-range-row">
+            <span className="settings-range-value">{profile.purineTarget}mg</span>
             <input
               type="range"
               min={200}
@@ -678,9 +293,9 @@ export default function SettingsPage() {
               step={10}
               value={profile.purineTarget}
               onChange={handlePurineTarget}
-              style={s.rangeInput}
+              className="settings-range-input"
             />
-            <div style={s.rangeLabels}>
+            <div className="settings-range-labels">
               <span>200mg</span>
               <span>400mg</span>
               <span>600mg</span>
@@ -689,10 +304,10 @@ export default function SettingsPage() {
         </div>
 
         {/* Water Intake Goal */}
-        <div style={{ ...s.fieldGroup, marginBottom: 0 }}>
-          <label style={s.label}>Water Intake Goal</label>
-          <div style={s.rangeRow}>
-            <span style={s.rangeValue}>{profile.waterGoal}oz</span>
+        <div className="settings-field-group">
+          <label className="settings-label">Water Intake Goal</label>
+          <div className="settings-range-row">
+            <span className="settings-range-value">{profile.waterGoal}oz</span>
             <input
               type="range"
               min={32}
@@ -700,9 +315,9 @@ export default function SettingsPage() {
               step={4}
               value={profile.waterGoal}
               onChange={handleWaterGoal}
-              style={s.rangeInput}
+              className="settings-range-input"
             />
-            <div style={s.rangeLabels}>
+            <div className="settings-range-labels">
               <span>32oz</span>
               <span>80oz</span>
               <span>128oz</span>
@@ -712,16 +327,16 @@ export default function SettingsPage() {
       </div>
 
       {/* ── App Section ──────────────────────────────────────────────────── */}
-      <div style={s.card}>
-        <h2 style={s.cardTitle}>App</h2>
+      <div className="settings-card">
+        <h2 className="settings-card-title">App</h2>
 
-        <div style={s.toggleRow}>
-          <span style={s.toggleLabel}>Dark Mode</span>
+        <div className="settings-toggle-row">
+          <span className="settings-toggle-label">Dark Mode</span>
           <Toggle checked={isDark} onChange={handleDarkModeToggle} />
         </div>
 
-        <div style={{ ...s.toggleRow, borderBottom: 'none' }}>
-          <span style={s.toggleLabel}>Notifications</span>
+        <div className="settings-toggle-row">
+          <span className="settings-toggle-label">Notifications</span>
           <Toggle
             checked={profile.notificationsEnabled}
             onChange={handleNotificationsToggle}
@@ -730,23 +345,21 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Subscription Section ─────────────────────────────────────────── */}
-      <div style={s.card}>
-        <h2 style={s.cardTitle}>Subscription</h2>
+      <div className="settings-card">
+        <h2 className="settings-card-title">Subscription</h2>
 
-        <span
-          style={{ ...s.subscriptionBadge, ...getSubscriptionBadgeStyle() }}
-        >
+        <span className={getSubscriptionBadgeClass()}>
           {getSubscriptionLabel()}
         </span>
 
-        <div style={s.btnRow}>
+        <div className="settings-btn-row">
           {!premium && (
-            <Link href="/premium" style={{ ...s.btn, ...s.btnPrimary }}>
-              Upgrade to Premium
+            <Link href="/premium" className="settings-btn settings-btn-primary">
+              <CrownIcon size={16} color="#ffffff" /> Upgrade to Premium
             </Link>
           )}
           <button
-            style={s.btn}
+            className="settings-btn"
             onClick={handleRestorePurchases}
             disabled={restoring}
           >
@@ -756,21 +369,19 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Data Section ─────────────────────────────────────────────────── */}
-      <div style={s.card}>
-        <h2 style={s.cardTitle}>Data</h2>
+      <div className="settings-card">
+        <h2 className="settings-card-title">Data</h2>
 
-        <div style={{ ...s.btnRow, marginBottom: '10px' }}>
-          <button style={s.btn} onClick={handleExportJSON}>
+        <div className="settings-btn-row" style={{ marginBottom: 10 }}>
+          <button className="settings-btn" onClick={handleExportJSON}>
             Export Data (JSON)
           </button>
           <button
-            style={{
-              ...s.btn,
-              ...(premium ? {} : { opacity: 0.5, cursor: 'not-allowed' }),
-            }}
+            className="settings-btn"
             onClick={premium ? handleExportPDF : undefined}
             disabled={!premium}
             title={premium ? 'Export PDF report' : 'Premium feature'}
+            style={!premium ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
           >
             Export PDF Report
             {!premium && ' (Premium)'}
@@ -778,7 +389,8 @@ export default function SettingsPage() {
         </div>
 
         <button
-          style={{ ...s.btn, ...s.btnDanger, width: '100%' }}
+          className="settings-btn settings-btn-danger"
+          style={{ width: '100%' }}
           onClick={() => setShowClearModal(true)}
         >
           Clear All Data
@@ -786,29 +398,29 @@ export default function SettingsPage() {
       </div>
 
       {/* ── About Section ────────────────────────────────────────────────── */}
-      <div style={s.card}>
-        <h2 style={s.cardTitle}>About</h2>
+      <div className="settings-card">
+        <h2 className="settings-card-title">About</h2>
 
-        <Link href="/terms" style={s.link}>
+        <Link href="/terms" className="settings-link">
           Terms of Service
         </Link>
-        <Link href="/privacy" style={s.link}>
+        <Link href="/privacy" className="settings-link">
           Privacy Policy
         </Link>
-        <Link href="/disclaimer" style={{ ...s.link, borderBottom: 'none' }}>
+        <Link href="/disclaimer" className="settings-link">
           Medical Disclaimer
         </Link>
 
-        <p style={s.versionText}>GoutCare v1.0.0</p>
+        <p className="settings-version">GoutCare v1.0.0</p>
       </div>
 
       {/* ── Medical Disclaimer ───────────────────────────────────────────── */}
-      <div style={s.disclaimer}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-          <ShieldIcon size={16} color="#dc2626" />
-          <span style={s.disclaimerTitle}>Medical Disclaimer</span>
+      <div className="settings-disclaimer">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <ShieldIcon size={16} color="var(--color-danger)" />
+          <span className="settings-disclaimer-title">Medical Disclaimer</span>
         </div>
-        <p style={s.disclaimerText}>
+        <p className="settings-disclaimer-text">
           GoutCare is not a substitute for professional medical advice, diagnosis,
           or treatment. Always consult your rheumatologist or healthcare provider
           before making changes to your diet or medications.
@@ -817,23 +429,23 @@ export default function SettingsPage() {
 
       {/* ── Clear Data Confirmation Modal ────────────────────────────────── */}
       {showClearModal && (
-        <div style={s.overlay} onClick={() => setShowClearModal(false)}>
-          <div style={s.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 style={s.modalTitle}>Clear All Data?</h3>
-            <p style={s.modalText}>
+        <div className="settings-overlay" onClick={() => setShowClearModal(false)}>
+          <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="settings-modal-title">Clear All Data?</h3>
+            <p className="settings-modal-text">
               This will permanently delete all your GoutCare data including food
               logs, uric acid readings, flare history, and settings. This action
               cannot be undone.
             </p>
-            <div style={s.modalBtnRow}>
+            <div className="settings-modal-btn-row">
               <button
-                style={s.modalBtn}
+                className="settings-modal-btn"
                 onClick={() => setShowClearModal(false)}
               >
                 Cancel
               </button>
               <button
-                style={{ ...s.modalBtn, ...s.modalBtnDanger }}
+                className="settings-modal-btn settings-modal-btn-danger"
                 onClick={handleClearData}
               >
                 Delete Everything

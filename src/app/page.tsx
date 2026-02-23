@@ -93,7 +93,7 @@ export default function DashboardPage() {
 
   if (!mounted) {
     return (
-      <div className="page-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+      <div className="page-container flex-center" style={{ minHeight: '100vh' }}>
         <div className="spinner spinner-lg" />
       </div>
     );
@@ -104,166 +104,217 @@ export default function DashboardPage() {
   const purineRatio = purineTarget > 0 ? currentPurine / purineTarget : 0;
   const purinePercent = Math.min(purineRatio * 100, 100);
 
-  // Color: green if under 50%, yellow if 50-80%, red if over 80%
-  let progressColor = 'var(--color-success)';
+  let progressColor = '#34d399';
   if (purineRatio > 0.8) {
-    progressColor = 'var(--color-danger)';
+    progressColor = '#f87171';
   } else if (purineRatio >= 0.5) {
-    progressColor = 'var(--color-warning)';
+    progressColor = '#fbbf24';
   }
 
   const uricAcidValue = lastUricAcid ? lastUricAcid.value.toFixed(1) : '--';
   const uricAcidColor = lastUricAcid
     ? getUricAcidColor(lastUricAcid.value)
-    : 'var(--color-gray-400)';
+    : 'var(--color-text-tertiary)';
 
   const currentWater = waterIntake?.total || 0;
   const foods = dailyLog?.foods || [];
 
   return (
     <div className="page-container">
-      {/* Greeting Header with Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 16, paddingBottom: 20 }}>
-        <ShieldIcon size={32} color="var(--color-primary)" />
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--foreground)', margin: 0 }}>
-            GoutCare
-          </h1>
-          <p style={{ fontSize: 13, color: 'var(--color-gray-500)', margin: 0 }}>
-            Your daily gout management dashboard
+      {/* ── Gradient Hero Header ──────────────────────────────────────── */}
+      <div className="dashboard-hero">
+        <div className="dashboard-hero-header">
+          <div className="dashboard-hero-logo">
+            <ShieldIcon size={24} color="#ffffff" />
+          </div>
+          <div>
+            <h1 className="dashboard-hero h1">GoutCare</h1>
+            <p className="dashboard-hero-subtitle">Your daily gout management dashboard</p>
+          </div>
+        </div>
+
+        {/* Purine Progress — glass card inside the hero */}
+        <div className="purine-hero-card">
+          <div className="purine-hero-header">
+            <span className="purine-hero-title">Daily Purine</span>
+            <span className="purine-hero-value">
+              {currentPurine} / {purineTarget} mg
+            </span>
+          </div>
+          <div className="purine-hero-bar">
+            <div
+              className="purine-hero-bar-fill"
+              style={{
+                width: `${purinePercent}%`,
+                background: progressColor,
+              }}
+            />
+          </div>
+          <p className="purine-hero-remaining">
+            {Math.max(0, purineTarget - currentPurine)} mg remaining today
           </p>
         </div>
       </div>
 
-      {/* Daily Purine Progress */}
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div className="section-header" style={{ marginBottom: 10 }}>
-          <span className="section-title">Daily Purine Progress</span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: progressColor }}>
-            {currentPurine} / {purineTarget} mg
-          </span>
-        </div>
-        <div className="progress-bar">
-          <div
-            className="progress-bar-fill"
-            style={{
-              width: `${purinePercent}%`,
-              backgroundColor: progressColor,
-            }}
-          />
-        </div>
-        <p style={{ fontSize: 12, color: 'var(--color-gray-500)', marginTop: 6, textAlign: 'center' }}>
-          {Math.max(0, purineTarget - currentPurine)} mg remaining today
-        </p>
-      </div>
-
-      {/* Stats Row */}
-      <div className="stats-row" style={{ marginBottom: 16 }}>
-        {/* Current Uric Acid */}
+      {/* ── Stats Row ─────────────────────────────────────────────────── */}
+      <div className="stats-row">
         <div className="stat-card">
           <span className="stat-value" style={{ color: uricAcidColor }}>
             {uricAcidValue}
           </span>
-          <span className="stat-label">Uric Acid (mg/dL)</span>
+          <span className="stat-label">Uric Acid</span>
         </div>
 
-        {/* Days Since Last Flare */}
         <div className="stat-card">
           <span className="stat-value" style={{ color: 'var(--color-orange)' }}>
-            {daysSinceFlare !== null ? daysSinceFlare : 'None'}
+            {daysSinceFlare !== null ? daysSinceFlare : '--'}
           </span>
           <span className="stat-label">
-            {daysSinceFlare !== null ? 'Days since flare' : 'No flares'}
+            {daysSinceFlare !== null ? 'Days no flare' : 'No flares'}
           </span>
         </div>
 
-        {/* Water Intake Today */}
         <div className="stat-card">
           <span className="stat-value" style={{ color: 'var(--color-cyan)' }}>
             {currentWater}
           </span>
-          <span className="stat-label">Water (oz) today</span>
+          <span className="stat-label">Water (oz)</span>
         </div>
       </div>
 
-      {/* Quick Actions Grid */}
-      <div style={{ marginBottom: 16 }}>
-        <div className="section-header" style={{ marginBottom: 10 }}>
+      {/* ── Quick Actions ─────────────────────────────────────────────── */}
+      <div className="section" style={{ marginBottom: 20 }}>
+        <div className="section-header">
           <span className="section-title">Quick Actions</span>
         </div>
-        <div className="quick-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {/* Scan Food */}
-          <Link href="/scanner" className="quick-action-btn" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '18px 12px', borderRadius: 'var(--border-radius)', backgroundColor: 'var(--color-blue-light)', textDecoration: 'none', border: 'none', cursor: 'pointer', transition: 'transform 0.15s ease' }}>
-            <div className="quick-action-icon" style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'var(--color-blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="quick-actions">
+          <Link
+            href="/scanner"
+            className="quick-action-btn"
+            style={{ backgroundColor: 'var(--color-blue-light)' }}
+          >
+            <div
+              className="quick-action-icon"
+              style={{ backgroundColor: 'var(--color-blue)' }}
+            >
               <ScanIcon size={22} color="#ffffff" />
             </div>
-            <span className="quick-action-label" style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-blue)' }}>Scan Food</span>
+            <span className="quick-action-label" style={{ color: 'var(--color-blue)' }}>
+              Scan Food
+            </span>
           </Link>
 
-          {/* Log Uric Acid */}
-          <Link href="/uric-acid" className="quick-action-btn" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '18px 12px', borderRadius: 'var(--border-radius)', backgroundColor: 'var(--color-green-light)', textDecoration: 'none', border: 'none', cursor: 'pointer', transition: 'transform 0.15s ease' }}>
-            <div className="quick-action-icon" style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'var(--color-green)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Link
+            href="/uric-acid"
+            className="quick-action-btn"
+            style={{ backgroundColor: 'var(--color-green-light)' }}
+          >
+            <div
+              className="quick-action-icon"
+              style={{ backgroundColor: 'var(--color-green)' }}
+            >
               <ChartIcon size={22} color="#ffffff" />
             </div>
-            <span className="quick-action-label" style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-green)' }}>Log Uric Acid</span>
+            <span className="quick-action-label" style={{ color: 'var(--color-green)' }}>
+              Log Uric Acid
+            </span>
           </Link>
 
-          {/* Log Flare */}
-          <Link href="/flares" className="quick-action-btn" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '18px 12px', borderRadius: 'var(--border-radius)', backgroundColor: 'var(--color-danger-light)', textDecoration: 'none', border: 'none', cursor: 'pointer', transition: 'transform 0.15s ease' }}>
-            <div className="quick-action-icon" style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'var(--color-danger)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Link
+            href="/flares"
+            className="quick-action-btn"
+            style={{ backgroundColor: 'var(--color-danger-light)' }}
+          >
+            <div
+              className="quick-action-icon"
+              style={{ backgroundColor: 'var(--color-danger)' }}
+            >
               <FlameIcon size={22} color="#ffffff" />
             </div>
-            <span className="quick-action-label" style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>Log Flare</span>
+            <span className="quick-action-label" style={{ color: 'var(--color-danger)' }}>
+              Log Flare
+            </span>
           </Link>
 
-          {/* Log Water */}
-          <Link href="/hydration" className="quick-action-btn" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '18px 12px', borderRadius: 'var(--border-radius)', backgroundColor: 'var(--color-cyan-light)', textDecoration: 'none', border: 'none', cursor: 'pointer', transition: 'transform 0.15s ease' }}>
-            <div className="quick-action-icon" style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'var(--color-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Link
+            href="/hydration"
+            className="quick-action-btn"
+            style={{ backgroundColor: 'var(--color-cyan-light)' }}
+          >
+            <div
+              className="quick-action-icon"
+              style={{ backgroundColor: 'var(--color-cyan)' }}
+            >
               <DropletIcon size={22} color="#ffffff" />
             </div>
-            <span className="quick-action-label" style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-cyan)' }}>Log Water</span>
+            <span className="quick-action-label" style={{ color: 'var(--color-cyan)' }}>
+              Log Water
+            </span>
           </Link>
         </div>
       </div>
 
-      {/* Today's Foods */}
-      <div>
-        <div className="section-header" style={{ marginBottom: 10 }}>
+      {/* ── Today's Foods ─────────────────────────────────────────────── */}
+      <div className="section">
+        <div className="section-header">
           <span className="section-title">Today&apos;s Foods</span>
+          {foods.length > 0 && (
+            <Link href="/database" className="section-action">
+              Add more
+            </Link>
+          )}
         </div>
 
         {foods.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: '32px 16px' }}>
-            <ForkKnifeIcon size={36} color="var(--color-gray-300)" />
-            <p style={{ fontSize: 14, color: 'var(--color-gray-400)', marginTop: 10 }}>
-              No foods logged yet today
+          <div className="card" style={{ textAlign: 'center', padding: '36px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--color-primary-light)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ForkKnifeIcon size={26} color="var(--color-primary)" />
+              </div>
+            </div>
+            <p
+              style={{
+                fontSize: 15,
+                fontWeight: 600,
+                color: 'var(--color-text)',
+                marginBottom: 4,
+              }}
+            >
+              No foods logged yet
             </p>
-            <p style={{ fontSize: 12, color: 'var(--color-gray-400)', marginTop: 4 }}>
-              Scan a meal or search the database to get started
+            <p style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+              Scan a meal or search the database to start tracking
             </p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {foods.map((food: FoodEntry) => (
-              <div
-                key={food.id}
-                className="card"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 14px',
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--foreground)' }}>
-                    {food.name}
-                  </span>
-                  <span style={{ fontSize: 12, color: 'var(--color-gray-500)' }}>
-                    {formatTime(food.timestamp)}
-                  </span>
+              <div key={food.id} className="food-log-card">
+                <div>
+                  <div className="food-log-name">{food.name}</div>
+                  <div className="food-log-time">{formatTime(food.timestamp)}</div>
                 </div>
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-orange)' }}>
+                <span
+                  className="food-log-purine"
+                  style={{
+                    color:
+                      food.purineContent > 200
+                        ? 'var(--color-danger)'
+                        : food.purineContent > 100
+                        ? 'var(--color-warning)'
+                        : 'var(--color-success)',
+                  }}
+                >
                   {food.purineContent} mg
                 </span>
               </div>
