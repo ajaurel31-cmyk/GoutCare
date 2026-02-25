@@ -42,7 +42,7 @@ export default function OnboardingPage() {
         <div style={styles.logoCircle}>
           <svg width="44" height="52" viewBox="0 0 20 24">
             <path d="M10 0 C10 0 0 12 0 16 C0 20.4 4.5 24 10 24 C15.5 24 20 20.4 20 16 C20 12 10 0 10 0Z" fill="#fff" />
-            <text x="10" y="18" textAnchor="middle" fontFamily="system-ui, sans-serif" fontSize="12" fontWeight="900" fill="#1e3a5f">G</text>
+            <path d="M12.2 17 L12.2 18.6 C11.5 19.2 10.6 19.6 9.6 19.6 C7.2 19.6 5.6 17.6 5.6 15.2 C5.6 12.8 7.2 10.8 9.6 10.8 C10.8 10.8 11.7 11.2 12.3 11.8 L11.3 13 C10.8 12.5 10.3 12.2 9.6 12.2 C8.1 12.2 7.2 13.4 7.2 15.2 C7.2 17 8.1 18.2 9.6 18.2 C10.2 18.2 10.7 18 11 17.6 L11 16.8 L9.8 16.8 L9.8 15.6 L12.2 15.6 Z" fill="#1e3a5f"/>
           </svg>
         </div>
 
