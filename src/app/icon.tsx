@@ -10,23 +10,16 @@ export default function Icon() {
         style={{
           width: 32,
           height: 32,
-          borderRadius: 8,
-          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+          borderRadius: '50%',
+          background: '#000',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <span
-          style={{
-            color: '#fff',
-            fontSize: 22,
-            fontWeight: 900,
-            letterSpacing: '-0.04em',
-          }}
-        >
-          G
-        </span>
+        <svg width="18" height="16" viewBox="0 0 18 16">
+          <polygon points="9,1 17,15 1,15" fill="#fff" />
+        </svg>
       </div>
     ),
     { ...size }

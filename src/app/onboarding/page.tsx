@@ -38,9 +38,11 @@ export default function OnboardingPage() {
   return (
     <div style={styles.container}>
       <div style={styles.inner}>
-        {/* G Logo */}
+        {/* Logo */}
         <div style={styles.logoCircle}>
-          <span style={{ color: '#fff', fontSize: 38, fontWeight: 900, letterSpacing: '-0.04em' }}>G</span>
+          <svg width="40" height="35" viewBox="0 0 18 16">
+            <polygon points="9,1 17,15 1,15" fill="#fff" />
+          </svg>
         </div>
 
         <h1 style={styles.heading}>Welcome to GoutCare</h1>
@@ -125,9 +127,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   logoCircle: {
     width: 80, height: 80,
-    borderRadius: 24,
-    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-    boxShadow: '0 8px 32px rgba(59,130,246,0.4)',
+    borderRadius: '50%',
+    background: '#000',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

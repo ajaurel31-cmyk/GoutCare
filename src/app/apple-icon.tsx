@@ -10,23 +10,16 @@ export default function AppleIcon() {
         style={{
           width: 180,
           height: 180,
-          borderRadius: 40,
-          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+          borderRadius: '50%',
+          background: '#000',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <span
-          style={{
-            color: '#fff',
-            fontSize: 120,
-            fontWeight: 900,
-            letterSpacing: '-0.04em',
-          }}
-        >
-          G
-        </span>
+        <svg width="100" height="88" viewBox="0 0 18 16">
+          <polygon points="9,1 17,15 1,15" fill="#fff" />
+        </svg>
       </div>
     ),
     { ...size }
