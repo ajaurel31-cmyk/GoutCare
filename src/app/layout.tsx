@@ -6,7 +6,6 @@ export const metadata: Metadata = {
   title: "GoutCare — AI-Powered Gout Management",
   description:
     "Manage gout with AI food scanning, purine tracking, uric acid monitoring, and personalized dietary guidance.",
-  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -30,7 +29,7 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#0a0e1a" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        {/* apple-icon.tsx generates the apple-touch-icon automatically */}
       </head>
       <body>
         <AppShell>{children}</AppShell>
