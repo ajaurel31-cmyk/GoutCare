@@ -3,33 +3,26 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckIcon, CrownIcon } from '@/components/icons';
-import { updateUserProfile } from '@/lib/storage';
-import { startTrial, purchaseProduct } from '@/lib/subscription';
+import { purchaseProduct } from '@/lib/subscription';
 import { PRODUCT_IDS } from '@/lib/constants';
 
-type Plan = 'trial' | 'monthly' | 'annual';
+type Plan = 'monthly' | 'annual';
 
-export default function OnboardingPage() {
+export default function PaywallPage() {
   const router = useRouter();
-  const [selected, setSelected] = useState<Plan>('trial');
+  const [selected, setSelected] = useState<Plan>('annual');
   const [loading, setLoading] = useState(false);
 
-  const handleContinue = async () => {
+  const handleSubscribe = async () => {
     setLoading(true);
     try {
-      if (selected === 'trial') {
-        startTrial();
-      } else if (selected === 'monthly') {
-        await purchaseProduct(PRODUCT_IDS.monthly);
-      } else {
-        await purchaseProduct(PRODUCT_IDS.annual);
+      const productId = selected === 'monthly' ? PRODUCT_IDS.monthly : PRODUCT_IDS.annual;
+      const success = await purchaseProduct(productId);
+      if (success) {
+        router.replace('/');
       }
-      updateUserProfile({ onboardingComplete: true });
-      router.replace('/');
     } catch {
-      // On failure still mark onboarding and proceed
-      updateUserProfile({ onboardingComplete: true });
-      router.replace('/');
+      // Purchase failed — stay on paywall
     } finally {
       setLoading(false);
     }
@@ -39,28 +32,29 @@ export default function OnboardingPage() {
     <div style={styles.container}>
       <div style={styles.inner}>
         {/* G Logo */}
-        <div style={styles.logoCircle}>
+        <div style={styles.logo}>
           <span style={{ color: '#fff', fontSize: 38, fontWeight: 900, letterSpacing: '-0.04em' }}>G</span>
         </div>
 
-        <h1 style={styles.heading}>Welcome to GoutCare</h1>
-        <p style={styles.sub}>Your AI-powered companion for gout management</p>
+        <h1 style={styles.heading}>Your Free Trial Has Ended</h1>
+        <p style={styles.sub}>
+          Subscribe to continue tracking your gout, scanning foods with AI, and managing your health.
+        </p>
+
+        {/* Features list */}
+        <div style={styles.features}>
+          {['AI-powered food scanning', 'Unlimited purine tracking', 'Uric acid trends & insights', 'Flare logging & analysis'].map((feat) => (
+            <div key={feat} style={styles.featureRow}>
+              <div style={styles.featureCheck}>
+                <CheckIcon size={12} color="#fff" />
+              </div>
+              <span style={styles.featureText}>{feat}</span>
+            </div>
+          ))}
+        </div>
 
         {/* Plan Cards */}
         <div style={styles.plans}>
-          {/* 7-day trial */}
-          <button
-            onClick={() => setSelected('trial')}
-            style={{ ...styles.planCard, ...(selected === 'trial' ? styles.planSelected : {}) }}
-          >
-            <div style={styles.planTop}>
-              <span style={styles.planName}>7-Day Free Trial</span>
-              {selected === 'trial' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
-            </div>
-            <span style={styles.planPrice}>$0.00</span>
-            <span style={styles.planDetail}>Full access for 7 days, cancel anytime</span>
-          </button>
-
           {/* Monthly */}
           <button
             onClick={() => setSelected('monthly')}
@@ -71,7 +65,7 @@ export default function OnboardingPage() {
               {selected === 'monthly' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
             </div>
             <span style={styles.planPrice}>$4.99<span style={styles.planPeriod}>/month</span></span>
-            <span style={styles.planDetail}>Billed monthly</span>
+            <span style={styles.planDetail}>Billed monthly, cancel anytime</span>
           </button>
 
           {/* Annual */}
@@ -85,22 +79,24 @@ export default function OnboardingPage() {
               {selected === 'annual' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
             </div>
             <span style={styles.planPrice}>$29.99<span style={styles.planPeriod}>/year</span></span>
-            <span style={styles.planDetail}>Just $2.50/month</span>
+            <span style={styles.planDetail}>Just $2.50/month — best value</span>
           </button>
         </div>
 
         {/* CTA */}
-        <button onClick={handleContinue} disabled={loading} style={styles.cta}>
+        <button onClick={handleSubscribe} disabled={loading} style={styles.cta}>
           <CrownIcon size={20} color="#1e3a5f" />
-          <span>{loading ? 'Loading...' : selected === 'trial' ? 'Start Free Trial' : 'Subscribe Now'}</span>
+          <span>{loading ? 'Processing...' : 'Subscribe Now'}</span>
         </button>
 
-        <p style={styles.cancel}>Cancel anytime. No charge during trial.</p>
+        <p style={styles.cancel}>Cancel anytime. Subscription renews automatically.</p>
 
         <div style={styles.legal}>
           <span style={styles.legalLink}>Terms of Service</span>
           <span style={styles.legalSep}>|</span>
           <span style={styles.legalLink}>Privacy Policy</span>
+          <span style={styles.legalSep}>|</span>
+          <span style={styles.legalLink}>Restore Purchases</span>
         </div>
       </div>
     </div>
@@ -123,7 +119,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     alignItems: 'center',
   },
-  logoCircle: {
+  logo: {
     width: 80, height: 80,
     borderRadius: 24,
     background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
@@ -133,22 +129,29 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     marginBottom: 24,
   },
-  heading: { fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 8, textAlign: 'center' },
-  sub: { fontSize: 15, color: 'rgba(255,255,255,0.6)', textAlign: 'center', marginBottom: 32, lineHeight: 1.5 },
-  plans: { width: '100%', display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 },
+  heading: { fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8, textAlign: 'center' as const },
+  sub: { fontSize: 15, color: 'rgba(255,255,255,0.6)', textAlign: 'center' as const, marginBottom: 24, lineHeight: 1.5, maxWidth: 320 },
+  features: { width: '100%', marginBottom: 28, display: 'flex', flexDirection: 'column' as const, gap: 12 },
+  featureRow: { display: 'flex', alignItems: 'center', gap: 12 },
+  featureCheck: {
+    width: 22, height: 22, borderRadius: '50%', background: '#22c55e',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  featureText: { fontSize: 15, color: 'rgba(255,255,255,0.85)', fontWeight: 500 },
+  plans: { width: '100%', display: 'flex', flexDirection: 'column' as const, gap: 12, marginBottom: 24 },
   planCard: {
-    position: 'relative',
+    position: 'relative' as const,
     width: '100%',
     background: 'rgba(255,255,255,0.06)',
     border: '2px solid rgba(255,255,255,0.1)',
     borderRadius: 16,
     padding: '18px 20px',
     cursor: 'pointer',
-    textAlign: 'left',
+    textAlign: 'left' as const,
     color: '#fff',
     transition: 'all 0.2s',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     gap: 4,
   },
   planSelected: {
@@ -166,7 +169,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   saveBadge: {
-    position: 'absolute',
+    position: 'absolute' as const,
     top: -10, right: 14,
     background: 'linear-gradient(135deg, #f59e0b, #f97316)',
     color: '#fff', fontSize: 11, fontWeight: 700,
@@ -185,7 +188,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 16,
     transition: 'opacity 0.2s',
   },
-  cancel: { fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center', marginBottom: 24 },
+  cancel: { fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' as const, marginBottom: 24 },
   legal: { display: 'flex', alignItems: 'center', gap: 8 },
   legalLink: { fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline', cursor: 'pointer' },
   legalSep: { fontSize: 12, color: 'rgba(255,255,255,0.15)' },

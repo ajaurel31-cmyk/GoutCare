@@ -17,6 +17,8 @@ import {
   getWaterIntake,
   getUserProfile,
 } from '@/lib/storage';
+import { isTrialActive, isSubscribed } from '@/lib/subscription';
+import { getTrialDaysRemaining } from '@/lib/subscription';
 import { getToday, formatTime } from '@/lib/utils';
 import type { DailyLog, UricAcidReading, WaterIntake, FoodEntry } from '@/lib/types';
 import Link from 'next/link';
@@ -44,6 +46,7 @@ export default function DashboardPage() {
   const [lastUA, setLastUA] = useState<UricAcidReading | null>(null);
   const [daysSinceFlare, setDaysSinceFlare] = useState<number | null>(null);
   const [water, setWater] = useState<WaterIntake | null>(null);
+  const [trialDays, setTrialDays] = useState<number>(0);
 
   useEffect(() => {
     // Gate: must complete onboarding first
@@ -52,6 +55,14 @@ export default function DashboardPage() {
       router.replace('/onboarding');
       return;
     }
+
+    // Gate: trial expired and not subscribed — send to paywall
+    if (!isTrialActive() && !isSubscribed()) {
+      router.replace('/paywall');
+      return;
+    }
+
+    setTrialDays(getTrialDaysRemaining());
 
     const today = getToday();
     setDailyLog(getDailyLog(today));
@@ -104,10 +115,33 @@ export default function DashboardPage() {
           <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em' }}>{getGreeting()}</h1>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 2 }}>{getDateString()}</p>
         </div>
-        <div style={{ width: 44, height: 44, borderRadius: 14, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <span style={{ color: '#fff', fontSize: 20, fontWeight: 800 }}>G</span>
+        <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg, #3b82f6, #2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(59,130,246,0.3)' }}>
+          <span style={{ color: '#fff', fontSize: 20, fontWeight: 900, letterSpacing: '-0.04em' }}>G</span>
         </div>
       </div>
+
+      {/* ── Trial Banner ─────────────────────────────────────────── */}
+      {trialDays > 0 && trialDays <= 7 && (
+        <Link href="/paywall" style={{ textDecoration: 'none', display: 'block', marginBottom: 16 }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))',
+            border: '1px solid rgba(59,130,246,0.25)',
+            borderRadius: 14,
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
+            <div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)' }}>
+                {trialDays === 1 ? 'Last day of free trial!' : `${trialDays} days left in free trial`}
+              </span>
+              <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>Tap to view plans</p>
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent)', whiteSpace: 'nowrap' }}>Upgrade &rarr;</span>
+          </div>
+        </Link>
+      )}
 
       {/* ── Daily Purine Intake ─────────────────────────────────── */}
       <div className="section">

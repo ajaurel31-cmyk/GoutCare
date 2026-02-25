@@ -18,7 +18,7 @@ function getTrialInfo(): { isTrial: boolean; daysRemaining: number } {
   }
 
   try {
-    const profileStr = localStorage.getItem('goutcare_profile');
+    const profileStr = localStorage.getItem('goutcare_user_profile');
     if (!profileStr) return { isTrial: false, daysRemaining: 0 };
 
     const profile = JSON.parse(profileStr);
