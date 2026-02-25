@@ -1,11 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ShieldIcon,
-  ScanIcon,
-  ChartIcon,
   FlameIcon,
   DropletIcon,
   ForkKnifeIcon,
@@ -16,12 +13,23 @@ import {
   getGoutFlares,
   getWaterIntake,
   getUserProfile,
+  addWaterEntry,
+  addUricAcidReading,
+  addGoutFlare,
+  addFoodEntry,
 } from '@/lib/storage';
 import { isTrialActive, isSubscribed } from '@/lib/subscription';
 import { getTrialDaysRemaining } from '@/lib/subscription';
 import { getToday, formatTime } from '@/lib/utils';
 import type { DailyLog, UricAcidReading, WaterIntake, FoodEntry } from '@/lib/types';
 import Link from 'next/link';
+
+import WaterLogModal from '@/components/WaterLogModal';
+import UricAcidLogModal from '@/components/UricAcidLogModal';
+import FlareLogModal from '@/components/FlareLogModal';
+import FoodLogModal from '@/components/FoodLogModal';
+
+type ModalType = 'water' | 'uricAcid' | 'flare' | 'food' | null;
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -47,23 +55,15 @@ export default function DashboardPage() {
   const [daysSinceFlare, setDaysSinceFlare] = useState<number | null>(null);
   const [water, setWater] = useState<WaterIntake | null>(null);
   const [trialDays, setTrialDays] = useState<number>(0);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'danger' } | null>(null);
 
-  useEffect(() => {
-    // Gate: must complete onboarding first
-    const profile = getUserProfile();
-    if (!profile.onboardingComplete) {
-      router.replace('/onboarding');
-      return;
-    }
+  const showToast = useCallback((message: string, type: 'success' | 'danger' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 2500);
+  }, []);
 
-    // Gate: trial expired and not subscribed — send to paywall
-    if (!isTrialActive() && !isSubscribed()) {
-      router.replace('/paywall');
-      return;
-    }
-
-    setTrialDays(getTrialDaysRemaining());
-
+  const refreshData = useCallback(() => {
     const today = getToday();
     setDailyLog(getDailyLog(today));
 
@@ -77,11 +77,61 @@ export default function DashboardPage() {
       const fd = new Date(flares[0].date + 'T00:00:00');
       fd.setHours(0, 0, 0, 0);
       setDaysSinceFlare(Math.floor((now.getTime() - fd.getTime()) / 86400000));
+    } else {
+      setDaysSinceFlare(null);
     }
 
     setWater(getWaterIntake(today));
+  }, []);
+
+  useEffect(() => {
+    const profile = getUserProfile();
+    if (!profile.onboardingComplete) {
+      router.replace('/onboarding');
+      return;
+    }
+
+    if (!isTrialActive() && !isSubscribed()) {
+      router.replace('/paywall');
+      return;
+    }
+
+    setTrialDays(getTrialDaysRemaining());
+    refreshData();
     setMounted(true);
-  }, [router]);
+  }, [router, refreshData]);
+
+  // ── Modal Handlers ──────────────────────────────────────────────
+
+  const handleWaterSave = (amount: number) => {
+    addWaterEntry(getToday(), amount);
+    setActiveModal(null);
+    refreshData();
+    showToast(`Added ${amount} oz of water`);
+  };
+
+  const handleUricAcidSave = (reading: { date: string; value: number; notes: string }) => {
+    addUricAcidReading(reading);
+    setActiveModal(null);
+    refreshData();
+    showToast(`Logged ${reading.value} mg/dL`);
+  };
+
+  const handleFlareSave = (flare: Parameters<typeof addGoutFlare>[0]) => {
+    addGoutFlare(flare);
+    setActiveModal(null);
+    refreshData();
+    showToast('Flare logged');
+  };
+
+  const handleFoodSave = (food: { foodId: string; name: string; servingSize: string; purineContent: number }) => {
+    addFoodEntry(getToday(), food);
+    setActiveModal(null);
+    refreshData();
+    showToast(`Added ${food.name} (${food.purineContent} mg)`);
+  };
+
+  // ── Loading ─────────────────────────────────────────────────────
 
   if (!mounted) {
     return (
@@ -116,7 +166,10 @@ export default function DashboardPage() {
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 2 }}>{getDateString()}</p>
         </div>
         <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg, #3b82f6, #2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(59,130,246,0.3)' }}>
-          <span style={{ color: '#fff', fontSize: 20, fontWeight: 900, letterSpacing: '-0.04em' }}>G</span>
+          <svg width="24" height="28" viewBox="0 0 20 24">
+            <path d="M10 0 C10 0 0 12 0 16 C0 20.4 4.5 24 10 24 C15.5 24 20 20.4 20 16 C20 12 10 0 10 0Z" fill="#fff" />
+            <path d="M12.2 17 L12.2 18.6 C11.5 19.2 10.6 19.6 9.6 19.6 C7.2 19.6 5.6 17.6 5.6 15.2 C5.6 12.8 7.2 10.8 9.6 10.8 C10.8 10.8 11.7 11.2 12.3 11.8 L11.3 13 C10.8 12.5 10.3 12.2 9.6 12.2 C8.1 12.2 7.2 13.4 7.2 15.2 C7.2 17 8.1 18.2 9.6 18.2 C10.2 18.2 10.7 18 11 17.6 L11 16.8 L9.8 16.8 L9.8 15.6 L12.2 15.6 Z" fill="#1e3a5f"/>
+          </svg>
         </div>
       </div>
 
@@ -156,7 +209,7 @@ export default function DashboardPage() {
           <div className="progress-track">
             <div className="progress-fill" style={{ width: `${pct}%`, background: barColor }} />
           </div>
-          <p style={{ fontSize: 13, color: 'var(--success)', marginTop: 8 }}>{statusText}</p>
+          <p style={{ fontSize: 13, color: barColor, marginTop: 8 }}>{statusText}</p>
         </div>
       </div>
 
@@ -164,30 +217,27 @@ export default function DashboardPage() {
       <div className="section">
         <div className="section-label">Quick Stats</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-          {/* Uric Acid */}
-          <div className="card" style={{ textAlign: 'center', padding: '14px 8px' }}>
+          <button className="card" onClick={() => setActiveModal('uricAcid')} style={{ textAlign: 'center', padding: '14px 8px', cursor: 'pointer' }}>
             <DropletIcon size={20} color="var(--accent)" />
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 8 }}>Uric Acid</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', marginTop: 4 }}>
               {lastUA ? `${lastUA.value.toFixed(1)} mg/dL` : 'No readings'}
             </div>
-          </div>
-          {/* Since Flare */}
-          <div className="card" style={{ textAlign: 'center', padding: '14px 8px' }}>
+          </button>
+          <button className="card" onClick={() => setActiveModal('flare')} style={{ textAlign: 'center', padding: '14px 8px', cursor: 'pointer' }}>
             <FlameIcon size={20} color="var(--orange)" />
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 8 }}>Since Flare</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', marginTop: 4 }}>
               {daysSinceFlare !== null ? `${daysSinceFlare} days` : 'No flares logged'}
             </div>
-          </div>
-          {/* Water */}
-          <div className="card" style={{ textAlign: 'center', padding: '14px 8px' }}>
+          </button>
+          <button className="card" onClick={() => setActiveModal('water')} style={{ textAlign: 'center', padding: '14px 8px', cursor: 'pointer' }}>
             <DropletIcon size={20} color="var(--cyan)" />
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 8 }}>Water</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)', marginTop: 4 }}>
               {waterTotal} / {waterGoal} oz
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -195,22 +245,22 @@ export default function DashboardPage() {
       <div className="section">
         <div className="section-label">Quick Actions</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <Link href="/scanner" className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 12px', background: 'var(--accent)', border: 'none', cursor: 'pointer', textDecoration: 'none' }}>
-            <ScanIcon size={28} color="#ffffff" />
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#ffffff' }}>Scan Food</span>
-          </Link>
-          <Link href="/uric-acid" className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 12px', cursor: 'pointer', textDecoration: 'none' }}>
+          <button onClick={() => setActiveModal('food')} className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 12px', background: 'var(--accent)', border: 'none', cursor: 'pointer' }}>
+            <ForkKnifeIcon size={28} color="#ffffff" />
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#ffffff' }}>Add Food</span>
+          </button>
+          <button onClick={() => setActiveModal('uricAcid')} className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 12px', cursor: 'pointer' }}>
             <DropletIcon size={28} color="var(--accent)" />
             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>Log Uric Acid</span>
-          </Link>
-          <Link href="/scanner" className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 12px', cursor: 'pointer', textDecoration: 'none' }}>
+          </button>
+          <button onClick={() => setActiveModal('flare')} className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 12px', cursor: 'pointer' }}>
             <FlameIcon size={28} color="var(--orange)" />
             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>Log Flare</span>
-          </Link>
-          <Link href="/scanner" className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 12px', cursor: 'pointer', textDecoration: 'none' }}>
+          </button>
+          <button onClick={() => setActiveModal('water')} className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 12px', cursor: 'pointer' }}>
             <DropletIcon size={28} color="var(--cyan)" />
             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-secondary)' }}>Log Water</span>
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -231,6 +281,27 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ── Modals ──────────────────────────────────────────────── */}
+      {activeModal === 'water' && (
+        <WaterLogModal onClose={() => setActiveModal(null)} onSave={handleWaterSave} />
+      )}
+      {activeModal === 'uricAcid' && (
+        <UricAcidLogModal onClose={() => setActiveModal(null)} onSave={handleUricAcidSave} />
+      )}
+      {activeModal === 'flare' && (
+        <FlareLogModal onClose={() => setActiveModal(null)} onSave={handleFlareSave} />
+      )}
+      {activeModal === 'food' && (
+        <FoodLogModal onClose={() => setActiveModal(null)} onSave={handleFoodSave} />
+      )}
+
+      {/* ── Toast ───────────────────────────────────────────────── */}
+      {toast && (
+        <div className={`toast toast-${toast.type}`}>
+          {toast.message}
         </div>
       )}
     </>
