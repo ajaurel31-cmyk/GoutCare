@@ -8,6 +8,6 @@
   <rect width="192" height="192" rx="42" fill="url(#bg)"/>
   <!-- Water droplet -->
   <path d="M96 28 C96 28 40 100 40 128 C40 160 64 184 96 184 C128 184 152 160 152 128 C152 100 96 28 96 28Z" fill="#fff"/>
-  <!-- G letter -->
-  <text x="96" y="148" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="80" font-weight="900" fill="#1e3a5f">G</text>
+  <!-- G letter as path -->
+  <path d="M112 130 L112 140 C107 145 100 148 92 148 C74 148 62 136 62 118 C62 100 74 88 92 88 C101 88 108 91 113 96 L105 104 C101 100 97 98 92 98 C81 98 74 106 74 118 C74 130 81 138 92 138 C97 138 101 136 104 133 L104 128 L94 128 L94 120 L112 120 Z" fill="#1e3a5f"/>
 </svg>
