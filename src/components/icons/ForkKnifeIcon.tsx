@@ -1,31 +1,28 @@
 import React from 'react';
 
-interface IconProps {
+interface Props {
   size?: number;
   color?: string;
   className?: string;
 }
 
-export default function ForkKnifeIcon({ size = 24, color, className }: IconProps) {
+export default function ForkKnifeIcon({ size = 24, color = 'currentColor', className }: Props) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={color || 'currentColor'}
-      strokeWidth="1.5"
+      stroke={color}
+      strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
     >
-      {/* Fork */}
-      <path d="M7 2V9C7 10.1 7.9 11 9 11H9.5V22" />
-      <path d="M7 2C7 2 5 3.5 5 6.5C5 8.5 6 10 7 11" />
-      <path d="M12 2V9C12 10.1 11.1 11 10 11" />
-      {/* Knife */}
-      <path d="M17 2V22" />
-      <path d="M17 2C17 2 20 3 20 7C20 9 18.5 10 17 10" />
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+      <path d="M7 2v20" />
+      <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3" />
+      <path d="M18 15v7" />
     </svg>
   );
 }

@@ -1,20 +1,20 @@
 import React from 'react';
 
-interface IconProps {
+interface Props {
   size?: number;
   color?: string;
   className?: string;
 }
 
-export default function CloseIcon({ size = 24, color, className }: IconProps) {
+export default function CloseIcon({ size = 24, color = 'currentColor', className }: Props) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={color || 'currentColor'}
-      strokeWidth="2"
+      stroke={color}
+      strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}

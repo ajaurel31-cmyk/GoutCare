@@ -4,7 +4,8 @@ import { AppShell } from "./AppShell";
 
 export const metadata: Metadata = {
   title: "GoutCare — AI-Powered Gout Management",
-  description: "Manage gout with AI food scanning, purine tracking, uric acid monitoring, and personalized dietary guidance.",
+  description:
+    "Manage gout with AI food scanning, purine tracking, uric acid monitoring, and personalized dietary guidance.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -23,44 +24,20 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#1a56db" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#0a0e1a" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body>
         <AppShell>{children}</AppShell>
+        {/* Inline theme init to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var profile = JSON.parse(localStorage.getItem('goutcare_profile') || '{}');
-                  var theme = profile.theme || 'system';
-                  if (theme === 'system') {
-                    theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  }
-                  document.documentElement.setAttribute('data-theme', theme);
-                } catch(e) {}
-              })();
-            `,
-          }}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function() {});
-                });
-              }
-            `,
+            __html: `(function(){try{var p=JSON.parse(localStorage.getItem('goutcare_user_profile')||'{}');var t=p.theme||'dark';if(t==='system'){t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}})()`,
           }}
         />
       </body>
