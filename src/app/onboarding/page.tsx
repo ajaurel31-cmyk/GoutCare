@@ -38,10 +38,11 @@ export default function OnboardingPage() {
   return (
     <div style={styles.container}>
       <div style={styles.inner}>
-        {/* Logo */}
+        {/* Logo — blue square with white droplet + G */}
         <div style={styles.logoCircle}>
-          <svg width="40" height="35" viewBox="0 0 18 16">
-            <polygon points="9,1 17,15 1,15" fill="#fff" />
+          <svg width="44" height="52" viewBox="0 0 20 24">
+            <path d="M10 0 C10 0 0 12 0 16 C0 20.4 4.5 24 10 24 C15.5 24 20 20.4 20 16 C20 12 10 0 10 0Z" fill="#fff" />
+            <text x="10" y="18" textAnchor="middle" fontFamily="system-ui, sans-serif" fontSize="12" fontWeight="900" fill="#1e3a5f">G</text>
           </svg>
         </div>
 
@@ -127,9 +128,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   logoCircle: {
     width: 80, height: 80,
-    borderRadius: '50%',
-    background: '#000',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+    borderRadius: 24,
+    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+    boxShadow: '0 8px 32px rgba(59,130,246,0.4)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

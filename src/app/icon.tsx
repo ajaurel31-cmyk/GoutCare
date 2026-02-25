@@ -10,16 +10,56 @@ export default function Icon() {
         style={{
           width: 32,
           height: 32,
-          borderRadius: '50%',
-          background: '#000',
+          borderRadius: 8,
+          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <svg width="18" height="16" viewBox="0 0 18 16">
-          <polygon points="9,1 17,15 1,15" fill="#fff" />
-        </svg>
+        {/* Droplet with G — CSS shapes */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginTop: -1,
+          }}
+        >
+          {/* Droplet tip */}
+          <div
+            style={{
+              width: 7,
+              height: 7,
+              background: '#fff',
+              transform: 'rotate(45deg)',
+              marginBottom: -4,
+            }}
+          />
+          {/* Droplet body with G */}
+          <div
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              background: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <span
+              style={{
+                color: '#1e3a5f',
+                fontSize: 11,
+                fontWeight: 900,
+                marginTop: -1,
+              }}
+            >
+              G
+            </span>
+          </div>
+        </div>
       </div>
     ),
     { ...size }

@@ -1,4 +1,13 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="256" cy="256" r="256" fill="#000"/>
-  <polygon points="256,100 428,412 84,412" fill="#fff"/>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- Water droplet -->
+  <path d="M256 74 C256 74 106 266 106 342 C106 426 170 490 256 490 C342 490 406 426 406 342 C406 266 256 74 256 74Z" fill="#fff"/>
+  <!-- G letter -->
+  <text x="256" y="396" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="214" font-weight="900" fill="#1e3a5f">G</text>
 </svg>
