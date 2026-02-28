@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct DashboardView: View {
     @EnvironmentObject var store: DataStore
@@ -8,6 +9,7 @@ struct DashboardView: View {
     @State private var showWaterLog = false
     @State private var showUricAcidLog = false
     @State private var showFlareLog = false
+    @State private var isExportingPDF = false
 
     private var purinePercent: Double {
         min(Double(dailyLog.totalPurine) / Double(store.profile.purineTarget), 1.5)
@@ -91,6 +93,64 @@ struct DashboardView: View {
                     StatCard(icon: "fork.knife", title: "Foods Today", value: "\(dailyLog.foods.count) items", color: GC.purple)
                 }
 
+                // PDF Report Promo
+                Button {
+                    guard !isExportingPDF else { return }
+                    isExportingPDF = true
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        let pdfData = store.exportPDFReport()
+                        let url = FileManager.default.temporaryDirectory
+                            .appendingPathComponent("GoutCare-Report-\(Date().dateKey).pdf")
+                        try? pdfData.write(to: url)
+                        DispatchQueue.main.async {
+                            isExportingPDF = false
+                            sharePDF(url: url)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(
+                                    LinearGradient(colors: [GC.accent, Color(hex: 0x6366F1)],
+                                                   startPoint: .topLeading, endPoint: .bottomTrailing)
+                                )
+                                .frame(width: 44, height: 44)
+                            if isExportingPDF {
+                                ProgressView().tint(.white)
+                            } else {
+                                Image(systemName: "doc.text.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Share Health Report")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(GC.text)
+                            Text("Export a professional PDF for your doctor")
+                                .font(.system(size: 12))
+                                .foregroundColor(GC.textSecondary)
+                        }
+                        Spacer()
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(GC.accent)
+                    }
+                    .padding(14)
+                    .background(
+                        LinearGradient(
+                            colors: [GC.accent.opacity(0.08), GC.purple.opacity(0.08)],
+                            startPoint: .leading, endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(GC.accent.opacity(0.25), lineWidth: 1)
+                    )
+                }
+
                 // Quick Actions
                 VStack(spacing: 10) {
                     Text("Quick Actions")
@@ -153,6 +213,15 @@ struct DashboardView: View {
     private func refresh() {
         dailyLog = store.getDailyLog()
         waterTotal = store.getWaterIntake().total
+    }
+
+    private func sharePDF(url: URL) {
+        let avc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let root = scene.windows.first?.rootViewController else { return }
+        let presenter = root.presentedViewController ?? root
+        avc.popoverPresentationController?.sourceView = presenter.view
+        presenter.present(avc, animated: true)
     }
 
     private var latestUricAcid: String {

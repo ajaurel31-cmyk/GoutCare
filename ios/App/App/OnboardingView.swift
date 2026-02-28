@@ -39,6 +39,7 @@ struct OnboardingView: View {
                         FeatureRow(icon: "chart.line.uptrend.xyaxis", color: GC.success, text: "Track uric acid & flares")
                         FeatureRow(icon: "fork.knife", color: GC.orange, text: "600+ food purine database")
                         FeatureRow(icon: "bell.fill", color: GC.purple, text: "Smart medication reminders")
+                        FeatureRow(icon: "doc.text.fill", color: GC.cyan, text: "PDF health reports for your doctor")
                     }
 
                     // Plan selection
@@ -124,6 +125,7 @@ struct PaywallView: View {
                         FeatureRow(icon: "chart.line.uptrend.xyaxis", color: GC.success, text: "Full health tracking & trends")
                         FeatureRow(icon: "bolt.fill", color: GC.orange, text: "Flare analysis & insights")
                         FeatureRow(icon: "bell.fill", color: GC.purple, text: "Smart reminders")
+                        FeatureRow(icon: "doc.text.fill", color: GC.cyan, text: "PDF health reports for your doctor")
                     }
 
                     VStack(spacing: 12) {
