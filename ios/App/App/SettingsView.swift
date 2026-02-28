@@ -4,8 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject var store: DataStore
     @State private var showMedModal = false
     @State private var showClearConfirm = false
-    @State private var showExportShare = false
-    @State private var exportData: Data?
+    @State private var exportFileURL: URL?
     @State private var showPrivacy = false
     @State private var showTerms = false
     @State private var selectedTheme: AppTheme = .dark
@@ -215,8 +214,11 @@ struct SettingsView: View {
                     SectionLabel(text: "Data")
 
                     Button {
-                        exportData = store.exportAllData()
-                        showExportShare = true
+                        if let data = store.exportAllData() {
+                            let url = FileManager.default.temporaryDirectory.appendingPathComponent("goutcare-backup-\(Date().dateKey).json")
+                            try? data.write(to: url)
+                            exportFileURL = url
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "square.and.arrow.up").foregroundColor(GC.accent)
@@ -296,10 +298,8 @@ struct SettingsView: View {
         } message: {
             Text("This will permanently delete all your data. This cannot be undone.")
         }
-        .sheet(isPresented: $showExportShare) {
-            if let data = exportData {
-                ShareSheet(data: data)
-            }
+        .sheet(item: $exportFileURL) { url in
+            ShareSheet(url: url)
         }
     }
 
@@ -710,14 +710,17 @@ struct AddMedicationSheet: View {
     }
 }
 
+// MARK: - URL + Identifiable
+extension URL: @retroactive Identifiable {
+    public var id: String { absoluteString }
+}
+
 // MARK: - Share Sheet
 struct ShareSheet: UIViewControllerRepresentable {
-    let data: Data
+    let url: URL
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("goutcare_export.json")
-        try? data.write(to: tempURL)
-        return UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
+        UIActivityViewController(activityItems: [url], applicationActivities: nil)
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}

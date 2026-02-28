@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 import UserNotifications
 
 // MARK: - DataStore (UserDefaults persistence)
@@ -26,6 +27,12 @@ class DataStore: ObservableObject {
         self.uricAcidReadings = Self.load("gc_uric_acid") ?? []
         self.goutFlares = Self.load("gc_flares") ?? []
         self.reminderSettings = Self.load("gc_reminders") ?? ReminderSettings()
+    }
+
+    // MARK: - Theme
+
+    var activeColorScheme: ColorScheme? {
+        (AppTheme(rawValue: profile.theme) ?? .dark).colorScheme
     }
 
     // MARK: - Profile

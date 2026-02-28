@@ -8,7 +8,7 @@ struct GoutCareApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(store)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(store.activeColorScheme)
         }
     }
 }
