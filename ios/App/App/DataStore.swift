@@ -54,14 +54,26 @@ class DataStore: ObservableObject {
 
     func startTrial() {
         let exp = Calendar.current.date(byAdding: .day, value: Constants.trialDays, to: Date())!
-        subscription = SubscriptionStatus(isActive: true, plan: "trial", expiresAt: ISO8601DateFormatter().string(from: exp), isTrial: true)
+        let expString = ISO8601DateFormatter().string(from: exp)
+        subscription = SubscriptionStatus(
+            isActive: true,
+            plan: "trial",
+            expiresAt: expString,
+            isTrial: true
+        )
         save(subscription, key: "gc_subscription")
         updateProfile { $0.onboardingComplete = true }
     }
 
     func activateSubscription(plan: String) {
         let exp = Calendar.current.date(byAdding: plan == "annual" ? .year : .month, value: 1, to: Date())!
-        subscription = SubscriptionStatus(isActive: true, plan: plan, expiresAt: ISO8601DateFormatter().string(from: exp), isTrial: false)
+        let expString = ISO8601DateFormatter().string(from: exp)
+        subscription = SubscriptionStatus(
+            isActive: true,
+            plan: plan,
+            expiresAt: expString,
+            isTrial: false
+        )
         save(subscription, key: "gc_subscription")
         updateProfile { $0.onboardingComplete = true }
     }
