@@ -674,8 +674,8 @@ export default function SettingsPage() {
             AI-powered gout management. Track purines, scan foods, monitor uric acid, and manage flares.
           </p>
           <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
-            <a href="https://goutcare.vercel.app/terms" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Terms of Service</a>
-            <a href="https://goutcare.vercel.app/privacy" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Privacy Policy</a>
+            <Link href="/terms" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Terms of Service</Link>
+            <Link href="/privacy" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Privacy Policy</Link>
           </div>
         </div>
       </div>

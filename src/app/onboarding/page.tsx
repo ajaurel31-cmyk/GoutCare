@@ -2,15 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { CheckIcon, CrownIcon } from '@/components/icons';
 import { updateUserProfile } from '@/lib/storage';
 import { startTrial, purchaseProduct, restorePurchases } from '@/lib/subscription';
 import { PRODUCT_IDS } from '@/lib/constants';
 
 type Plan = 'trial' | 'monthly' | 'annual';
-
-const TERMS_URL = 'https://goutcare.vercel.app/terms';
-const PRIVACY_URL = 'https://goutcare.vercel.app/privacy';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -138,9 +136,9 @@ export default function OnboardingPage() {
         <p style={styles.cancel}>{disclosureText()}</p>
 
         <div style={styles.legal}>
-          <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>Terms of Service</a>
+          <Link href="/terms" style={styles.legalLink}>Terms of Service</Link>
           <span style={styles.legalSep}>|</span>
-          <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>Privacy Policy</a>
+          <Link href="/privacy" style={styles.legalLink}>Privacy Policy</Link>
           <span style={styles.legalSep}>|</span>
           <button onClick={handleRestore} disabled={loading} style={{ ...styles.legalLink, background: 'none', border: 'none', padding: 0 }}>
             Restore Purchases

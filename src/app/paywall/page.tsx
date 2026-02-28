@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { CheckIcon, CrownIcon } from '@/components/icons';
 import { purchaseProduct, startTrial, restorePurchases } from '@/lib/subscription';
 import { getUserProfile } from '@/lib/storage';
 import { PRODUCT_IDS } from '@/lib/constants';
 
 type Plan = 'trial' | 'monthly' | 'annual';
-
-const TERMS_URL = 'https://goutcare.vercel.app/terms';
-const PRIVACY_URL = 'https://goutcare.vercel.app/privacy';
 
 export default function PaywallPage() {
   const router = useRouter();
@@ -159,9 +157,9 @@ export default function PaywallPage() {
         <p style={styles.cancel}>{disclosureText()}</p>
 
         <div style={styles.legal}>
-          <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>Terms of Service</a>
+          <Link href="/terms" style={styles.legalLink}>Terms of Service</Link>
           <span style={styles.legalSep}>|</span>
-          <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>Privacy Policy</a>
+          <Link href="/privacy" style={styles.legalLink}>Privacy Policy</Link>
           <span style={styles.legalSep}>|</span>
           <button onClick={handleRestore} disabled={loading} style={{ ...styles.legalLink, background: 'none', border: 'none', padding: 0 }}>
             Restore Purchases
