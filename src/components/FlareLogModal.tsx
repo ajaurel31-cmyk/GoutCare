@@ -101,7 +101,7 @@ export default function FlareLogModal({ onClose, onSave }: Props) {
             <FlameIcon size={22} color="var(--orange)" />
             <h2 style={{ fontSize: 18, fontWeight: 700 }}>Log Flare</h2>
           </div>
-          <button onClick={onClose} style={{ padding: 4 }}>
+          <button onClick={onClose} aria-label="Close" style={{ padding: 4 }}>
             <CloseIcon size={20} color="var(--text-tertiary)" />
           </button>
         </div>
@@ -143,6 +143,7 @@ export default function FlareLogModal({ onClose, onSave }: Props) {
             max="10"
             value={painLevel}
             onChange={(e) => setPainLevel(Number(e.target.value))}
+            aria-label="Pain level"
             style={{
               width: '100%',
               height: 6,
@@ -165,11 +166,11 @@ export default function FlareLogModal({ onClose, onSave }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Hours</label>
-            <input className="input" type="number" inputMode="numeric" placeholder="0" value={durationHours || ''} onChange={(e) => setDurationHours(Number(e.target.value))} min="0" max="23" />
+            <input className="input" type="number" inputMode="numeric" placeholder="0" value={durationHours || ''} onChange={(e) => { const v = Number(e.target.value); if (v >= 0 && v <= 23) setDurationHours(v); }} min="0" max="23" />
           </div>
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Days</label>
-            <input className="input" type="number" inputMode="numeric" placeholder="0" value={durationDays || ''} onChange={(e) => setDurationDays(Number(e.target.value))} min="0" max="90" />
+            <input className="input" type="number" inputMode="numeric" placeholder="0" value={durationDays || ''} onChange={(e) => { const v = Number(e.target.value); if (v >= 0 && v <= 90) setDurationDays(v); }} min="0" max="90" />
           </div>
         </div>
 

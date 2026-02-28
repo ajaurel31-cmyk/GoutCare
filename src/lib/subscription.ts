@@ -215,6 +215,8 @@ export function isSubscribed(): boolean {
   if (isTrialActive()) return true;
   const status = getSubscriptionStatus();
   if (!status.isActive) return false;
+  // Expired trial should not grant access
+  if (status.plan === 'trial') return false;
   if (status.expiresAt) {
     const expiryDate = new Date(status.expiresAt);
     if (expiryDate < new Date()) return false;
@@ -223,6 +225,9 @@ export function isSubscribed(): boolean {
 }
 
 export function startTrial(): void {
+  // Guard: only allow one trial per user
+  const profile = getUserProfile();
+  if (profile.trialStartDate) return;
   updateUserProfile({ trialStartDate: getToday() });
   setSubscriptionStatus({
     isActive: true,

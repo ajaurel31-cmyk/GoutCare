@@ -300,7 +300,7 @@ export default function DashboardPage() {
 
       {/* ── Toast ───────────────────────────────────────────────── */}
       {toast && (
-        <div className={`toast toast-${toast.type}`}>
+        <div className={`toast toast-${toast.type}`} role="alert">
           {toast.message}
         </div>
       )}

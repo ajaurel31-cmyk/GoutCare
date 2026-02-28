@@ -21,7 +21,9 @@ export function generateId(): string {
  * Example: "Feb 21, 2026"
  */
 export function formatDate(date: string | Date): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = typeof date === 'string'
+    ? new Date(date.length === 10 ? date + 'T00:00:00' : date)
+    : date;
   return d.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -34,7 +36,9 @@ export function formatDate(date: string | Date): string {
  * Example: "3:45 PM"
  */
 export function formatTime(date: string | Date): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = typeof date === 'string'
+    ? new Date(date.length === 10 ? date + 'T00:00:00' : date)
+    : date;
   return d.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
@@ -118,7 +122,7 @@ export function getDaysSince(date: string): number {
   const target = new Date(date + 'T00:00:00');
   target.setHours(0, 0, 0, 0);
   const diffTime = now.getTime() - target.getTime();
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.round(diffTime / (1000 * 60 * 60 * 24));
 }
 
 /**

@@ -257,7 +257,7 @@ export default function TrackerPage() {
                         <span style={{ fontSize: 18, fontWeight: 800, color: uaColor(r.value) }}>{r.value.toFixed(1)}</span>
                         <div style={{ fontSize: 11, fontWeight: 600, color: uaColor(r.value) }}>{uaLabel(r.value)}</div>
                       </div>
-                      <button onClick={() => handleDeleteReading(r.id)} style={{ padding: 4, opacity: 0.4 }}>
+                      <button onClick={() => handleDeleteReading(r.id)} aria-label="Delete reading" style={{ padding: 4, opacity: 0.4 }}>
                         <CloseIcon size={14} color="var(--text-tertiary)" />
                       </button>
                     </div>
@@ -313,7 +313,7 @@ export default function TrackerPage() {
                         }}>
                           {f.painLevel}/10
                         </div>
-                        <button onClick={() => handleDeleteFlare(f.id)} style={{ padding: 4, opacity: 0.4 }}>
+                        <button onClick={() => handleDeleteFlare(f.id)} aria-label="Delete flare" style={{ padding: 4, opacity: 0.4 }}>
                           <CloseIcon size={14} color="var(--text-tertiary)" />
                         </button>
                       </div>
@@ -362,7 +362,7 @@ export default function TrackerPage() {
       )}
 
       {/* FAB */}
-      <button className="fab" onClick={() => setActiveModal(tab === 'uricAcid' ? 'uricAcid' : 'flare')}>
+      <button className="fab" onClick={() => setActiveModal(tab === 'uricAcid' ? 'uricAcid' : 'flare')} aria-label={tab === 'uricAcid' ? 'Add uric acid reading' : 'Log flare'}>
         <PlusIcon size={24} color="#fff" />
       </button>
 
@@ -375,7 +375,7 @@ export default function TrackerPage() {
       )}
 
       {/* Toast */}
-      {toast && <div className="toast toast-success">{toast}</div>}
+      {toast && <div className="toast toast-success" role="alert">{toast}</div>}
     </div>
   );
 }

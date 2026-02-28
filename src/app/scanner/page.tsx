@@ -502,7 +502,7 @@ export default function ScannerPage() {
       )}
 
       {/* Toast */}
-      {toast && <div className="toast toast-success">{toast}</div>}
+      {toast && <div className="toast toast-success" role="alert">{toast}</div>}
     </div>
   );
 }

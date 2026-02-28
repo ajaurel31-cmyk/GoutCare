@@ -3,17 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckIcon, CrownIcon } from '@/components/icons';
-import { purchaseProduct, startTrial } from '@/lib/subscription';
+import { purchaseProduct, startTrial, restorePurchases } from '@/lib/subscription';
 import { getUserProfile } from '@/lib/storage';
 import { PRODUCT_IDS } from '@/lib/constants';
 
 type Plan = 'trial' | 'monthly' | 'annual';
+
+const TERMS_URL = 'https://goutcare.vercel.app/terms';
+const PRIVACY_URL = 'https://goutcare.vercel.app/privacy';
 
 export default function PaywallPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<Plan>('annual');
   const [loading, setLoading] = useState(false);
   const [canTrial, setCanTrial] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const profile = getUserProfile();
@@ -26,6 +30,7 @@ export default function PaywallPage() {
 
   const handleSubscribe = async () => {
     setLoading(true);
+    setError(null);
     try {
       if (selected === 'trial') {
         startTrial();
@@ -38,10 +43,33 @@ export default function PaywallPage() {
         router.replace('/');
       }
     } catch {
-      // Purchase failed — stay on paywall
+      setError('Purchase failed. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRestore = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const restored = await restorePurchases();
+      if (restored) {
+        router.replace('/');
+      } else {
+        setError('No active subscription found. Please subscribe to continue.');
+      }
+    } catch {
+      setError('Could not restore purchases. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const disclosureText = () => {
+    if (selected === 'trial') return 'No charge during trial. After 7 days, subscribe at $4.99/month or $29.99/year to continue.';
+    if (selected === 'monthly') return 'Subscription auto-renews at $4.99/month until cancelled.';
+    return 'Subscription auto-renews at $29.99/year until cancelled.';
   };
 
   return (
@@ -85,7 +113,7 @@ export default function PaywallPage() {
                 {selected === 'trial' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
               </div>
               <span style={styles.planPrice}>$0.00</span>
-              <span style={styles.planDetail}>Full access for 7 days, cancel anytime</span>
+              <span style={styles.planDetail}>Full access for 7 days, then choose a plan</span>
             </button>
           )}
 
@@ -117,20 +145,27 @@ export default function PaywallPage() {
           </button>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <p style={styles.error}>{error}</p>
+        )}
+
         {/* CTA */}
-        <button onClick={handleSubscribe} disabled={loading} style={styles.cta}>
+        <button onClick={handleSubscribe} disabled={loading} style={{ ...styles.cta, opacity: loading ? 0.6 : 1 }}>
           <CrownIcon size={20} color="#1e3a5f" />
           <span>{loading ? 'Processing...' : selected === 'trial' ? 'Start Free Trial' : 'Subscribe Now'}</span>
         </button>
 
-        <p style={styles.cancel}>{selected === 'trial' ? 'No charge during trial. Cancel anytime.' : 'Cancel anytime. Subscription renews automatically.'}</p>
+        <p style={styles.cancel}>{disclosureText()}</p>
 
         <div style={styles.legal}>
-          <span style={styles.legalLink}>Terms of Service</span>
+          <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>Terms of Service</a>
           <span style={styles.legalSep}>|</span>
-          <span style={styles.legalLink}>Privacy Policy</span>
+          <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer" style={styles.legalLink}>Privacy Policy</a>
           <span style={styles.legalSep}>|</span>
-          <span style={styles.legalLink}>Restore Purchases</span>
+          <button onClick={handleRestore} disabled={loading} style={{ ...styles.legalLink, background: 'none', border: 'none', padding: 0 }}>
+            Restore Purchases
+          </button>
         </div>
       </div>
     </div>
@@ -209,6 +244,9 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#fff', fontSize: 11, fontWeight: 700,
     padding: '3px 10px', borderRadius: 20,
   },
+  error: {
+    fontSize: 13, color: '#ef4444', textAlign: 'center' as const, marginBottom: 12,
+  },
   cta: {
     width: '100%',
     padding: '16px 24px',
@@ -222,8 +260,8 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 16,
     transition: 'opacity 0.2s',
   },
-  cancel: { fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' as const, marginBottom: 24 },
-  legal: { display: 'flex', alignItems: 'center', gap: 8 },
+  cancel: { fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' as const, marginBottom: 24, lineHeight: 1.5, maxWidth: 320 },
+  legal: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'center' },
   legalLink: { fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline', cursor: 'pointer' },
   legalSep: { fontSize: 12, color: 'rgba(255,255,255,0.15)' },
 };

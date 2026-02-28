@@ -30,7 +30,7 @@ export default function WaterLogModal({ onClose, onSave }: Props) {
             <DropletIcon size={22} color="var(--cyan)" />
             <h2 style={{ fontSize: 18, fontWeight: 700 }}>Log Water</h2>
           </div>
-          <button onClick={onClose} style={{ padding: 4 }}>
+          <button onClick={onClose} aria-label="Close" style={{ padding: 4 }}>
             <CloseIcon size={20} color="var(--text-tertiary)" />
           </button>
         </div>
@@ -72,7 +72,13 @@ export default function WaterLogModal({ onClose, onSave }: Props) {
             inputMode="numeric"
             placeholder="Enter amount..."
             value={custom}
-            onChange={(e) => { setCustom(e.target.value); setSelected(null); }}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === '' || (Number(v) >= 0 && Number(v) <= 128)) {
+                setCustom(v);
+                setSelected(null);
+              }
+            }}
             min="1"
             max="128"
           />

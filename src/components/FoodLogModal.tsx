@@ -53,14 +53,16 @@ export default function FoodLogModal({ onClose, onSave }: Props) {
             <ForkKnifeIcon size={22} color="var(--accent)" />
             <h2 style={{ fontSize: 18, fontWeight: 700 }}>Add Food</h2>
           </div>
-          <button onClick={onClose} style={{ padding: 4 }}>
+          <button onClick={onClose} aria-label="Close" style={{ padding: 4 }}>
             <CloseIcon size={20} color="var(--text-tertiary)" />
           </button>
         </div>
 
         {/* Search */}
         <div style={{ position: 'relative', marginBottom: 16 }}>
-          <SearchIcon size={18} color="var(--text-tertiary)" />
+          <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 1, display: 'flex' }}>
+            <SearchIcon size={18} color="var(--text-tertiary)" />
+          </div>
           <input
             className="input"
             type="text"
@@ -68,7 +70,8 @@ export default function FoodLogModal({ onClose, onSave }: Props) {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setSelectedFood(null); }}
             autoFocus
-            style={{ paddingLeft: 16 }}
+            aria-label="Search foods"
+            style={{ paddingLeft: 40 }}
           />
         </div>
 
@@ -164,7 +167,7 @@ export default function FoodLogModal({ onClose, onSave }: Props) {
         {!search.trim() && !selectedFood && (
           <div style={{ textAlign: 'center', padding: '32px 16px' }}>
             <p style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>
-              Search from 300+ foods with purine data
+              Search from {purineDatabase.length}+ foods with purine data
             </p>
           </div>
         )}

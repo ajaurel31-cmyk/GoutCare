@@ -130,17 +130,18 @@ export default function SettingsPage() {
     showToast('Data exported');
   };
 
-  const handleClearData = () => {
+  const handleClearData = async () => {
     if (confirm('Are you sure? This will delete ALL your data and cannot be undone.')) {
       if (typeof window !== 'undefined') {
+        await cancelAllReminders();
         const keys: string[] = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key && key.startsWith('goutcare_')) keys.push(key);
         }
         keys.forEach((k) => localStorage.removeItem(k));
-        refresh();
         showToast('All data cleared');
+        window.location.href = '/';
       }
     }
   };
@@ -239,6 +240,7 @@ export default function SettingsPage() {
               step="25"
               value={profile.purineTarget}
               onChange={(e) => updateField('purineTarget', Number(e.target.value))}
+              aria-label="Purine limit"
               style={{
                 width: '100%', height: 6, borderRadius: 'var(--radius-full)',
                 appearance: 'none', WebkitAppearance: 'none',
@@ -267,6 +269,7 @@ export default function SettingsPage() {
               step="8"
               value={profile.waterGoal}
               onChange={(e) => updateField('waterGoal', Number(e.target.value))}
+              aria-label="Water goal"
               style={{
                 width: '100%', height: 6, borderRadius: 'var(--radius-full)',
                 appearance: 'none', WebkitAppearance: 'none',
@@ -305,6 +308,9 @@ export default function SettingsPage() {
               <button
                 className={`toggle ${reminders.waterEnabled ? 'toggle-active' : ''}`}
                 onClick={() => updateReminder('waterEnabled', !reminders.waterEnabled)}
+                role="switch"
+                aria-checked={reminders.waterEnabled}
+                aria-label="Water reminders"
               />
             </div>
             {reminders.waterEnabled && (
@@ -362,6 +368,9 @@ export default function SettingsPage() {
               <button
                 className={`toggle ${reminders.mealsEnabled ? 'toggle-active' : ''}`}
                 onClick={() => updateReminder('mealsEnabled', !reminders.mealsEnabled)}
+                role="switch"
+                aria-checked={reminders.mealsEnabled}
+                aria-label="Meal reminders"
               />
             </div>
             {reminders.mealsEnabled && (
@@ -415,6 +424,9 @@ export default function SettingsPage() {
               <button
                 className={`toggle ${reminders.medicationEnabled ? 'toggle-active' : ''}`}
                 onClick={() => updateReminder('medicationEnabled', !reminders.medicationEnabled)}
+                role="switch"
+                aria-checked={reminders.medicationEnabled}
+                aria-label="Medication reminders"
               />
             </div>
             {reminders.medicationEnabled && (
@@ -430,7 +442,7 @@ export default function SettingsPage() {
                         onChange={(e) => updateMedicationTime(i, e.target.value)}
                       />
                       {reminders.medicationTimes.length > 1 && (
-                        <button onClick={() => removeMedicationTime(i)} style={{ padding: 4, opacity: 0.5 }}>
+                        <button onClick={() => removeMedicationTime(i)} aria-label={`Remove dose ${i + 1}`} style={{ padding: 4, opacity: 0.5 }}>
                           <CloseIcon size={14} color="var(--text-tertiary)" />
                         </button>
                       )}
@@ -471,6 +483,9 @@ export default function SettingsPage() {
               <button
                 className={`toggle ${reminders.uricAcidEnabled ? 'toggle-active' : ''}`}
                 onClick={() => updateReminder('uricAcidEnabled', !reminders.uricAcidEnabled)}
+                role="switch"
+                aria-checked={reminders.uricAcidEnabled}
+                aria-label="Uric acid check reminders"
               />
             </div>
             {reminders.uricAcidEnabled && (
@@ -580,7 +595,7 @@ export default function SettingsPage() {
                       <div style={{ fontSize: 15, fontWeight: 600 }}>{med.name}</div>
                       {med.dosage && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>{med.dosage}</div>}
                     </div>
-                    <button onClick={() => handleDeleteMed(med.id)} style={{ padding: 4, opacity: 0.4 }}>
+                    <button onClick={() => handleDeleteMed(med.id)} aria-label={`Remove ${med.name}`} style={{ padding: 4, opacity: 0.4 }}>
                       <CloseIcon size={14} color="var(--text-tertiary)" />
                     </button>
                   </div>
@@ -658,6 +673,10 @@ export default function SettingsPage() {
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
             AI-powered gout management. Track purines, scan foods, monitor uric acid, and manage flares.
           </p>
+          <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
+            <a href="https://goutcare.vercel.app/terms" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Terms of Service</a>
+            <a href="https://goutcare.vercel.app/privacy" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Privacy Policy</a>
+          </div>
         </div>
       </div>
 
@@ -675,7 +694,7 @@ export default function SettingsPage() {
       )}
 
       {/* Toast */}
-      {toast && <div className="toast toast-success">{toast}</div>}
+      {toast && <div className="toast toast-success" role="alert">{toast}</div>}
     </div>
   );
 }
@@ -693,7 +712,7 @@ function MedicationModal({ onClose, onSave }: { onClose: () => void; onSave: (na
             <PillIcon size={22} color="var(--accent)" />
             <h2 style={{ fontSize: 18, fontWeight: 700 }}>Add Medication</h2>
           </div>
-          <button onClick={onClose} style={{ padding: 4 }}>
+          <button onClick={onClose} aria-label="Close" style={{ padding: 4 }}>
             <CloseIcon size={20} color="var(--text-tertiary)" />
           </button>
         </div>
