@@ -181,11 +181,21 @@ export default function ScannerPage() {
                 background: 'rgba(255,255,255,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <CameraIcon size={26} color="#fff" />
+                {/* Camera + food crosshair icon */}
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <rect x="1" y="6" width="22" height="15" rx="3" fill="rgba(255,255,255,0.25)" stroke="#fff" strokeWidth="1.5"/>
+                  <path d="M8 6L9.5 3h5L16 6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="13.5" r="4.5" stroke="#fff" strokeWidth="1.5"/>
+                  <circle cx="12" cy="13.5" r="2" fill="#fff" opacity="0.6"/>
+                  <line x1="12" y1="9" x2="12" y2="10.5" stroke="#fff" strokeWidth="1" opacity="0.5"/>
+                  <line x1="12" y1="16.5" x2="12" y2="18" stroke="#fff" strokeWidth="1" opacity="0.5"/>
+                  <line x1="7.5" y1="13.5" x2="9" y2="13.5" stroke="#fff" strokeWidth="1" opacity="0.5"/>
+                  <line x1="15" y1="13.5" x2="16.5" y2="13.5" stroke="#fff" strokeWidth="1" opacity="0.5"/>
+                </svg>
               </div>
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>Take Photo</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Use your camera to scan food</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>Point your camera at food to scan</div>
               </div>
             </button>
 
@@ -205,11 +215,17 @@ export default function ScannerPage() {
                 background: 'var(--accent-light)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <ScanIcon size={26} color="var(--accent)" />
+                {/* Photo gallery / image icon */}
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="4" width="20" height="16" rx="3" stroke="var(--accent)" strokeWidth="1.5"/>
+                  <circle cx="8.5" cy="10" r="2" fill="var(--accent)" opacity="0.5"/>
+                  <path d="M2 17l5-5 3 3 4-5 8 7" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="var(--accent)" fillOpacity="0.12"/>
+                  <path d="M16 4v-1.5a1 1 0 011-1h3.5a1 1 0 011 1V5" stroke="var(--accent)" strokeWidth="1.2" strokeLinecap="round" opacity="0.4"/>
+                </svg>
               </div>
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: 16, fontWeight: 700 }}>Upload Image</div>
-                <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginTop: 2 }}>Choose a photo from your library</div>
+                <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginTop: 2 }}>Choose a food photo from your library</div>
               </div>
             </button>
           </div>
@@ -233,24 +249,49 @@ export default function ScannerPage() {
 
           {/* How it works */}
           <div className="card" style={{ padding: '20px' }}>
-            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 14 }}>How it works</div>
-            {[
-              { step: '1', text: 'Take a photo or upload an image of your meal' },
-              { step: '2', text: 'AI identifies all foods and estimates purine content' },
-              { step: '3', text: 'Get personalized gout safety ratings and alternatives' },
-            ].map((item) => (
-              <div key={item.step} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: 'var(--radius-full)',
-                  background: 'var(--accent)', color: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, fontWeight: 700, flexShrink: 0,
-                }}>
-                  {item.step}
-                </div>
-                <span style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.5, paddingTop: 3 }}>{item.text}</span>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>How it works</div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--accent-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="7" width="20" height="14" rx="3" stroke="var(--accent)" strokeWidth="1.5"/>
+                  <path d="M8.5 7L10 4h4l1.5 3" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="14" r="3.5" stroke="var(--accent)" strokeWidth="1.5"/>
+                </svg>
               </div>
-            ))}
+              <div style={{ paddingTop: 2 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2 }}>Snap or upload</div>
+                <span style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>Take a photo of your meal or pick from gallery</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'rgba(139,92,246,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="var(--purple)" strokeWidth="1.5" strokeLinejoin="round"/>
+                  <path d="M2 17l10 5 10-5" stroke="var(--purple)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M2 12l10 5 10-5" stroke="var(--purple)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div style={{ paddingTop: 2 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2 }}>AI analysis</div>
+                <span style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>Identifies foods and calculates purine content</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--success-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 12l2 2 4-4" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9 9-4.03 9-9" stroke="var(--success)" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M21 5l-2-2M19 3v4h4" stroke="var(--success)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+                </svg>
+              </div>
+              <div style={{ paddingTop: 2 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2 }}>Get results</div>
+                <span style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>Safety ratings, risk factors, and safer alternatives</span>
+              </div>
+            </div>
           </div>
         </>
       )}
