@@ -258,11 +258,11 @@ struct SubscriptionStatus: Codable {
     var expiresAt: String?
     var isTrial: Bool
 
-    init() {
-        self.isActive = false
-        self.plan = "free"
-        self.expiresAt = nil
-        self.isTrial = false
+    init(isActive: Bool = false, plan: String = "free", expiresAt: String? = nil, isTrial: Bool = false) {
+        self.isActive = isActive
+        self.plan = plan
+        self.expiresAt = expiresAt
+        self.isTrial = isTrial
     }
 }
 
