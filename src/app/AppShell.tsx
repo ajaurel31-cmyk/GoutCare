@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import BottomNav from '@/components/BottomNav';
 
-const HIDE_NAV = ['/onboarding', '/paywall'];
+const HIDE_NAV = ['/onboarding', '/paywall', '/terms', '/privacy'];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
