@@ -22,6 +22,9 @@ class StoreManager: ObservableObject {
 
     private var transactionListener: Task<Void, Error>?
 
+    /// Whether products have been successfully loaded
+    var productsLoaded: Bool { !products.isEmpty }
+
     init() {
         transactionListener = listenForTransactions()
         Task { await loadProducts() }
@@ -33,15 +36,41 @@ class StoreManager: ObservableObject {
 
     // MARK: - Products
 
-    /// Fetch available subscription products from App Store
+    /// Fetch available subscription products from App Store with automatic retry
     func loadProducts() async {
-        do {
-            let ids = StoreProduct.allCases.map(\.rawValue)
-            let storeProducts = try await Product.products(for: Set(ids))
-            products = storeProducts.sorted { $0.price < $1.price }
-        } catch {
-            print("[StoreManager] Failed to load products: \(error)")
+        // Skip if already loaded
+        if !products.isEmpty { return }
+
+        let ids = Set(StoreProduct.allCases.map(\.rawValue))
+        let maxRetries = 3
+
+        for attempt in 1...maxRetries {
+            do {
+                let storeProducts = try await Product.products(for: ids)
+                if !storeProducts.isEmpty {
+                    products = storeProducts.sorted { $0.price < $1.price }
+                    print("[StoreManager] Loaded \(storeProducts.count) products")
+                    return
+                } else {
+                    print("[StoreManager] Attempt \(attempt): No products returned for IDs: \(ids)")
+                }
+            } catch {
+                print("[StoreManager] Attempt \(attempt): Failed to load products: \(error)")
+            }
+
+            // Wait before retrying (1s, 2s)
+            if attempt < maxRetries {
+                try? await Task.sleep(nanoseconds: UInt64(attempt) * 1_000_000_000)
+            }
         }
+
+        print("[StoreManager] All \(maxRetries) attempts to load products failed. Verify StoreKit Configuration is active in Xcode scheme.")
+    }
+
+    /// Force reload products (clears cache and retries)
+    func reloadProducts() async {
+        products = []
+        await loadProducts()
     }
 
     /// Get a specific product

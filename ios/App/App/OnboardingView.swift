@@ -147,14 +147,20 @@ struct OnboardingView: View {
             return
         }
 
-        let productID: StoreProduct = selectedPlan == "annual" ? .annual : .monthly
-        guard let product = storeManager.product(for: productID) else {
-            errorMessage = "Unable to load product. Please check your connection and try again."
-            return
-        }
-
         isPurchasing = true
         Task {
+            // If products haven't loaded yet, try loading them now
+            if !storeManager.productsLoaded {
+                await storeManager.reloadProducts()
+            }
+
+            let productID: StoreProduct = selectedPlan == "annual" ? .annual : .monthly
+            guard let product = storeManager.product(for: productID) else {
+                isPurchasing = false
+                errorMessage = "Unable to load product. Please check your internet connection and try again."
+                return
+            }
+
             let success = await store.purchaseSubscription(product)
             isPurchasing = false
             if !success, let err = storeManager.purchaseError {
@@ -282,14 +288,21 @@ struct PaywallView: View {
 
     private func handlePurchase() {
         errorMessage = nil
-        let productID: StoreProduct = selectedPlan == "annual" ? .annual : .monthly
-        guard let product = storeManager.product(for: productID) else {
-            errorMessage = "Unable to load product. Please check your connection and try again."
-            return
-        }
 
         isPurchasing = true
         Task {
+            // If products haven't loaded yet, try loading them now
+            if !storeManager.productsLoaded {
+                await storeManager.reloadProducts()
+            }
+
+            let productID: StoreProduct = selectedPlan == "annual" ? .annual : .monthly
+            guard let product = storeManager.product(for: productID) else {
+                isPurchasing = false
+                errorMessage = "Unable to load product. Please check your internet connection and try again."
+                return
+            }
+
             let success = await store.purchaseSubscription(product)
             isPurchasing = false
             if !success, let err = storeManager.purchaseError {
