@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import StoreKit
 import UserNotifications
 
 // MARK: - DataStore (UserDefaults persistence)
@@ -11,6 +12,7 @@ class DataStore: ObservableObject {
     private let defaults = UserDefaults.standard
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: Published State
     @Published var profile: UserProfile
@@ -20,6 +22,9 @@ class DataStore: ObservableObject {
     @Published var goutFlares: [GoutFlare]
     @Published var reminderSettings: ReminderSettings
 
+    // StoreKit manager
+    let storeManager = StoreManager.shared
+
     init() {
         self.profile = Self.load("gc_profile") ?? UserProfile()
         self.subscription = Self.load("gc_subscription") ?? SubscriptionStatus()
@@ -27,6 +32,19 @@ class DataStore: ObservableObject {
         self.uricAcidReadings = Self.load("gc_uric_acid") ?? []
         self.goutFlares = Self.load("gc_flares") ?? []
         self.reminderSettings = Self.load("gc_reminders") ?? ReminderSettings()
+
+        // Observe StoreManager changes to refresh subscription state
+        storeManager.objectWillChange.sink { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.syncSubscriptionFromStore()
+            }
+        }.store(in: &cancellables)
+
+        // Sync on launch
+        Task { @MainActor in
+            await storeManager.updateSubscriptionStatus()
+            syncSubscriptionFromStore()
+        }
     }
 
     // MARK: - Theme
@@ -44,29 +62,63 @@ class DataStore: ObservableObject {
 
     // MARK: - Subscription
 
+    /// User is subscribed if they have an active StoreKit subscription OR a valid local trial
     var isSubscribed: Bool {
-        subscription.isActive || isTrialActive
+        storeManager.hasActiveSubscription || isTrialActive
     }
 
+    /// Whether the local free trial is still active
     var isTrialActive: Bool {
-        guard subscription.isTrial, let start = subscription.expiresAt else { return false }
+        guard subscription.isTrial, let expStr = subscription.expiresAt else { return false }
         let fmt = ISO8601DateFormatter()
-        if let exp = fmt.date(from: start) { return Date() < exp }
+        if let exp = fmt.date(from: expStr) { return Date() < exp }
         return false
     }
 
+    /// Days remaining on local trial
     var trialDaysRemaining: Int {
-        guard subscription.isTrial, let start = subscription.expiresAt else { return 0 }
+        guard subscription.isTrial, let expStr = subscription.expiresAt else { return 0 }
         let fmt = ISO8601DateFormatter()
-        guard let exp = fmt.date(from: start) else { return 0 }
+        guard let exp = fmt.date(from: expStr) else { return 0 }
         return max(0, Calendar.current.dateComponents([.day], from: Date(), to: exp).day ?? 0)
     }
 
+    /// Whether user has a paid StoreKit subscription (not just trial)
+    var hasPaidSubscription: Bool {
+        storeManager.hasActiveSubscription
+    }
+
+    /// Display name for current plan
+    var currentPlanName: String {
+        if storeManager.hasActiveSubscription {
+            return storeManager.activePlanName
+        }
+        if isTrialActive { return "Free Trial" }
+        return "None"
+    }
+
+    /// Expiration date for display
+    var subscriptionExpirationDate: String? {
+        if storeManager.hasActiveSubscription {
+            return storeManager.formattedExpirationDate
+        }
+        if isTrialActive, let expStr = subscription.expiresAt {
+            let fmt = ISO8601DateFormatter()
+            if let exp = fmt.date(from: expStr) {
+                let df = DateFormatter()
+                df.dateStyle = .medium
+                return df.string(from: exp)
+            }
+        }
+        return nil
+    }
+
+    /// Start a local 7-day free trial (no payment required)
     func startTrial() {
         let exp = Calendar.current.date(byAdding: .day, value: Constants.trialDays, to: Date())!
         let expString = ISO8601DateFormatter().string(from: exp)
         subscription = SubscriptionStatus(
-            isActive: true,
+            isActive: false,
             plan: "trial",
             expiresAt: expString,
             isTrial: true
@@ -75,16 +127,49 @@ class DataStore: ObservableObject {
         updateProfile { $0.onboardingComplete = true }
     }
 
+    /// Purchase a StoreKit subscription
+    func purchaseSubscription(_ product: Product) async -> Bool {
+        let success = await storeManager.purchase(product)
+        if success {
+            syncSubscriptionFromStore()
+            updateProfile { $0.onboardingComplete = true }
+        }
+        return success
+    }
+
+    /// Restore purchases via StoreKit
+    func restorePurchases() async {
+        await storeManager.restorePurchases()
+        syncSubscriptionFromStore()
+    }
+
+    /// Open system subscription management
+    func manageSubscription() async {
+        await storeManager.showManageSubscription()
+    }
+
+    /// Sync local subscription status from StoreKit state
+    private func syncSubscriptionFromStore() {
+        if storeManager.hasActiveSubscription {
+            let plan = storeManager.activePlanName.lowercased()
+            let expStr = storeManager.subscriptionExpirationDate.map {
+                ISO8601DateFormatter().string(from: $0)
+            }
+            subscription = SubscriptionStatus(
+                isActive: true,
+                plan: plan,
+                expiresAt: expStr,
+                isTrial: false
+            )
+            save(subscription, key: "gc_subscription")
+        }
+        objectWillChange.send()
+    }
+
+    /// Legacy method kept for backward compatibility — now triggers StoreKit purchase
     func activateSubscription(plan: String) {
-        let exp = Calendar.current.date(byAdding: plan == "annual" ? .year : .month, value: 1, to: Date())!
-        let expString = ISO8601DateFormatter().string(from: exp)
-        subscription = SubscriptionStatus(
-            isActive: true,
-            plan: plan,
-            expiresAt: expString,
-            isTrial: false
-        )
-        save(subscription, key: "gc_subscription")
+        // In production, this should go through StoreKit purchase flow.
+        // This is called from OnboardingView/PaywallView which now use the async purchase flow.
         updateProfile { $0.onboardingComplete = true }
     }
 

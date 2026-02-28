@@ -1,9 +1,14 @@
 import SwiftUI
+import StoreKit
 
 // MARK: - Onboarding
 struct OnboardingView: View {
     @EnvironmentObject var store: DataStore
     @State private var selectedPlan = "trial"
+    @State private var isPurchasing = false
+    @State private var errorMessage: String?
+
+    private var storeManager: StoreManager { store.storeManager }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -52,21 +57,48 @@ struct OnboardingView: View {
                             badge: nil
                         ) { selectedPlan = "trial" }
 
-                        PlanCard(
-                            title: "Monthly",
-                            price: "$4.99/mo",
-                            desc: "Billed monthly",
-                            isSelected: selectedPlan == "monthly",
-                            badge: nil
-                        ) { selectedPlan = "monthly" }
+                        if let monthly = storeManager.monthlyProduct {
+                            PlanCard(
+                                title: "Monthly",
+                                price: storeManager.priceWithPeriod(for: monthly),
+                                desc: "Billed monthly, auto-renews",
+                                isSelected: selectedPlan == "monthly",
+                                badge: nil
+                            ) { selectedPlan = "monthly" }
+                        } else {
+                            PlanCard(
+                                title: "Monthly",
+                                price: "$4.99/mo",
+                                desc: "Billed monthly, auto-renews",
+                                isSelected: selectedPlan == "monthly",
+                                badge: nil
+                            ) { selectedPlan = "monthly" }
+                        }
 
-                        PlanCard(
-                            title: "Annual",
-                            price: "$29.99/yr",
-                            desc: "Billed annually",
-                            isSelected: selectedPlan == "annual",
-                            badge: "Save 50%"
-                        ) { selectedPlan = "annual" }
+                        if let annual = storeManager.annualProduct {
+                            PlanCard(
+                                title: "Annual",
+                                price: storeManager.priceWithPeriod(for: annual),
+                                desc: "Billed annually, auto-renews",
+                                isSelected: selectedPlan == "annual",
+                                badge: "Save 50%"
+                            ) { selectedPlan = "annual" }
+                        } else {
+                            PlanCard(
+                                title: "Annual",
+                                price: "$29.99/yr",
+                                desc: "Billed annually, auto-renews",
+                                isSelected: selectedPlan == "annual",
+                                badge: "Save 50%"
+                            ) { selectedPlan = "annual" }
+                        }
+                    }
+
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.system(size: 13))
+                            .foregroundColor(GC.danger)
+                            .multilineTextAlignment(.center)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -75,24 +107,60 @@ struct OnboardingView: View {
             // CTA
             VStack(spacing: 12) {
                 Button {
-                    if selectedPlan == "trial" {
-                        store.startTrial()
-                    } else {
-                        store.activateSubscription(plan: selectedPlan)
-                    }
+                    handlePurchase()
                 } label: {
-                    Text(selectedPlan == "trial" ? "Start Free Trial" : "Subscribe Now")
+                    if isPurchasing {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Text(selectedPlan == "trial" ? "Start Free Trial" : "Subscribe Now")
+                    }
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .disabled(isPurchasing)
 
-                Text("Cancel anytime. No commitment.")
-                    .font(.system(size: 12))
-                    .foregroundColor(GC.textTertiary)
+                if selectedPlan != "trial" {
+                    Text("Payment will be charged to your Apple ID. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period.")
+                        .font(.system(size: 10))
+                        .foregroundColor(GC.textTertiary)
+                        .multilineTextAlignment(.center)
+                } else {
+                    Text("No payment required. Cancel anytime.")
+                        .font(.system(size: 12))
+                        .foregroundColor(GC.textTertiary)
+                }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
         }
         .background(GC.bg.ignoresSafeArea())
+        .task {
+            await storeManager.loadProducts()
+        }
+    }
+
+    private func handlePurchase() {
+        errorMessage = nil
+
+        if selectedPlan == "trial" {
+            store.startTrial()
+            return
+        }
+
+        let productID: StoreProduct = selectedPlan == "annual" ? .annual : .monthly
+        guard let product = storeManager.product(for: productID) else {
+            errorMessage = "Unable to load product. Please check your connection and try again."
+            return
+        }
+
+        isPurchasing = true
+        Task {
+            let success = await store.purchaseSubscription(product)
+            isPurchasing = false
+            if !success, let err = storeManager.purchaseError {
+                errorMessage = err
+            }
+        }
     }
 }
 
@@ -100,6 +168,11 @@ struct OnboardingView: View {
 struct PaywallView: View {
     @EnvironmentObject var store: DataStore
     @State private var selectedPlan = "monthly"
+    @State private var isPurchasing = false
+    @State private var isRestoring = false
+    @State private var errorMessage: String?
+
+    private var storeManager: StoreManager { store.storeManager }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -129,8 +202,36 @@ struct PaywallView: View {
                     }
 
                     VStack(spacing: 12) {
-                        PlanCard(title: "Monthly", price: "$4.99/mo", desc: "Billed monthly", isSelected: selectedPlan == "monthly", badge: nil) { selectedPlan = "monthly" }
-                        PlanCard(title: "Annual", price: "$29.99/yr", desc: "Billed annually", isSelected: selectedPlan == "annual", badge: "Save 50%") { selectedPlan = "annual" }
+                        if let monthly = storeManager.monthlyProduct {
+                            PlanCard(
+                                title: "Monthly",
+                                price: storeManager.priceWithPeriod(for: monthly),
+                                desc: "Billed monthly, auto-renews",
+                                isSelected: selectedPlan == "monthly",
+                                badge: nil
+                            ) { selectedPlan = "monthly" }
+                        } else {
+                            PlanCard(title: "Monthly", price: "$4.99/mo", desc: "Billed monthly, auto-renews", isSelected: selectedPlan == "monthly", badge: nil) { selectedPlan = "monthly" }
+                        }
+
+                        if let annual = storeManager.annualProduct {
+                            PlanCard(
+                                title: "Annual",
+                                price: storeManager.priceWithPeriod(for: annual),
+                                desc: "Billed annually, auto-renews",
+                                isSelected: selectedPlan == "annual",
+                                badge: "Save 50%"
+                            ) { selectedPlan = "annual" }
+                        } else {
+                            PlanCard(title: "Annual", price: "$29.99/yr", desc: "Billed annually, auto-renews", isSelected: selectedPlan == "annual", badge: "Save 50%") { selectedPlan = "annual" }
+                        }
+                    }
+
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.system(size: 13))
+                            .foregroundColor(GC.danger)
+                            .multilineTextAlignment(.center)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -138,22 +239,75 @@ struct PaywallView: View {
 
             VStack(spacing: 12) {
                 Button {
-                    store.activateSubscription(plan: selectedPlan)
+                    handlePurchase()
                 } label: {
-                    Text("Subscribe Now")
+                    if isPurchasing {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text("Subscribe Now")
+                    }
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .disabled(isPurchasing || isRestoring)
 
-                Button("Restore Purchases") {
-                    // StoreKit restore logic
+                Button {
+                    handleRestore()
+                } label: {
+                    if isRestoring {
+                        HStack(spacing: 6) {
+                            ProgressView().tint(GC.textSecondary)
+                            Text("Restoring...")
+                        }
+                    } else {
+                        Text("Restore Purchases")
+                    }
                 }
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(GC.textSecondary)
+                .disabled(isPurchasing || isRestoring)
+
+                Text("Payment will be charged to your Apple ID. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period.")
+                    .font(.system(size: 10))
+                    .foregroundColor(GC.textTertiary)
+                    .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
         }
         .background(GC.bg.ignoresSafeArea())
+        .task {
+            await storeManager.loadProducts()
+        }
+    }
+
+    private func handlePurchase() {
+        errorMessage = nil
+        let productID: StoreProduct = selectedPlan == "annual" ? .annual : .monthly
+        guard let product = storeManager.product(for: productID) else {
+            errorMessage = "Unable to load product. Please check your connection and try again."
+            return
+        }
+
+        isPurchasing = true
+        Task {
+            let success = await store.purchaseSubscription(product)
+            isPurchasing = false
+            if !success, let err = storeManager.purchaseError {
+                errorMessage = err
+            }
+        }
+    }
+
+    private func handleRestore() {
+        errorMessage = nil
+        isRestoring = true
+        Task {
+            await store.restorePurchases()
+            isRestoring = false
+            if !store.isSubscribed {
+                errorMessage = "No active subscription found for this Apple ID."
+            }
+        }
     }
 }
 

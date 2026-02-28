@@ -20,27 +20,70 @@ struct SettingsView: View {
                 // Subscription
                 VStack(alignment: .leading, spacing: 8) {
                     SectionLabel(text: "Subscription")
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(planLabel)
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(GC.text)
-                            if store.subscription.isTrial {
-                                Text("\(store.trialDaysRemaining) days remaining")
-                                    .font(.system(size: 13))
+
+                    VStack(spacing: 0) {
+                        // Plan info
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(planLabel)
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(GC.text)
+                                if store.isTrialActive {
+                                    Text("\(store.trialDaysRemaining) days remaining")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(GC.textSecondary)
+                                } else if let expDate = store.subscriptionExpirationDate {
+                                    Text("Renews \(expDate)")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(GC.textSecondary)
+                                }
+                            }
+                            Spacer()
+                            Text(store.storeManager.subscriptionStatusText.uppercased())
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(subscriptionBadgeColor)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(subscriptionBadgeColor.opacity(0.12))
+                                .cornerRadius(20)
+                        }
+                        .padding(14)
+
+                        // Grace period / billing issue warning
+                        if store.storeManager.isInGracePeriod || store.storeManager.isInBillingRetry {
+                            Divider().background(GC.border)
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(GC.warning)
+                                Text("There's a billing issue with your subscription. Please update your payment method to avoid losing access.")
+                                    .font(.system(size: 12))
                                     .foregroundColor(GC.textSecondary)
                             }
+                            .padding(14)
                         }
-                        Spacer()
-                        Text(store.subscription.plan.uppercased())
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(GC.accent)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(GC.accentLight)
-                            .cornerRadius(20)
+
+                        // Manage subscription button
+                        if store.hasPaidSubscription {
+                            Divider().background(GC.border)
+                            Button {
+                                Task { await store.manageSubscription() }
+                            } label: {
+                                HStack {
+                                    Text("Manage Subscription")
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundColor(GC.accent)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(GC.textTertiary)
+                                }
+                                .padding(14)
+                            }
+                        }
                     }
-                    .card()
+                    .background(GC.bgCard)
+                    .cornerRadius(14)
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(GC.border, lineWidth: 1))
                 }
 
                 // Appearance
@@ -627,12 +670,19 @@ struct SettingsView: View {
     }
 
     private var planLabel: String {
-        switch store.subscription.plan {
-        case "trial": return "Free Trial"
-        case "monthly": return "Monthly Premium"
-        case "annual": return "Annual Premium"
-        default: return "Free Plan"
+        if store.hasPaidSubscription {
+            return store.currentPlanName + " Premium"
         }
+        if store.isTrialActive { return "Free Trial" }
+        return "No Active Plan"
+    }
+
+    private var subscriptionBadgeColor: Color {
+        if store.storeManager.isInGracePeriod || store.storeManager.isInBillingRetry {
+            return GC.warning
+        }
+        if store.isSubscribed { return GC.success }
+        return GC.textTertiary
     }
 }
 
