@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import UserNotifications
 
 // MARK: - DataStore (UserDefaults persistence)
 
@@ -16,6 +17,7 @@ class DataStore: ObservableObject {
     @Published var medications: [Medication]
     @Published var uricAcidReadings: [UricAcidReading]
     @Published var goutFlares: [GoutFlare]
+    @Published var reminderSettings: ReminderSettings
 
     init() {
         self.profile = Self.load("gc_profile") ?? UserProfile()
@@ -23,6 +25,7 @@ class DataStore: ObservableObject {
         self.medications = Self.load("gc_medications") ?? []
         self.uricAcidReadings = Self.load("gc_uric_acid") ?? []
         self.goutFlares = Self.load("gc_flares") ?? []
+        self.reminderSettings = Self.load("gc_reminders") ?? ReminderSettings()
     }
 
     // MARK: - Profile
@@ -196,6 +199,126 @@ class DataStore: ObservableObject {
         medications = []
         uricAcidReadings = []
         goutFlares = []
+        reminderSettings = ReminderSettings()
+        cancelAllNotifications()
+    }
+
+    // MARK: - Reminders
+
+    func updateReminders(_ update: (inout ReminderSettings) -> Void) {
+        update(&reminderSettings)
+        save(reminderSettings, key: "gc_reminders")
+        scheduleAllNotifications()
+    }
+
+    func requestNotificationPermission(completion: @escaping (Bool) -> Void) {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+            DispatchQueue.main.async {
+                self.updateProfile { $0.notificationsEnabled = granted }
+                completion(granted)
+            }
+        }
+    }
+
+    func cancelAllNotifications() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+
+    func scheduleAllNotifications() {
+        cancelAllNotifications()
+        let center = UNUserNotificationCenter.current()
+
+        // Water reminders
+        if reminderSettings.waterEnabled {
+            let startParts = reminderSettings.waterStartTime.split(separator: ":").compactMap { Int($0) }
+            let endParts = reminderSettings.waterEndTime.split(separator: ":").compactMap { Int($0) }
+            guard startParts.count == 2, endParts.count == 2 else { return }
+
+            let startHour = startParts[0]
+            let endHour = endParts[0]
+            var hour = startHour
+            var idx = 0
+            while hour <= endHour {
+                let content = UNMutableNotificationContent()
+                content.title = "Time to Hydrate"
+                content.body = "Drink some water to help flush uric acid and prevent flares."
+                content.sound = .default
+
+                var dateComponents = DateComponents()
+                dateComponents.hour = hour
+                dateComponents.minute = 0
+                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+                let request = UNNotificationRequest(identifier: "water_\(idx)", content: content, trigger: trigger)
+                center.add(request)
+                hour += reminderSettings.waterIntervalHours
+                idx += 1
+            }
+        }
+
+        // Meal reminders
+        if reminderSettings.mealsEnabled {
+            let meals = [
+                ("breakfast", reminderSettings.breakfastTime, "Log Your Breakfast", "Track your morning purine intake."),
+                ("lunch", reminderSettings.lunchTime, "Log Your Lunch", "Don't forget to log your midday meal."),
+                ("dinner", reminderSettings.dinnerTime, "Log Your Dinner", "Track your evening purine intake.")
+            ]
+            for (id, time, title, body) in meals {
+                let parts = time.split(separator: ":").compactMap { Int($0) }
+                guard parts.count == 2 else { continue }
+                let content = UNMutableNotificationContent()
+                content.title = title
+                content.body = body
+                content.sound = .default
+
+                var dateComponents = DateComponents()
+                dateComponents.hour = parts[0]
+                dateComponents.minute = parts[1]
+                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+                let request = UNNotificationRequest(identifier: "meal_\(id)", content: content, trigger: trigger)
+                center.add(request)
+            }
+        }
+
+        // Medication reminders
+        if reminderSettings.medicationEnabled {
+            for (i, time) in reminderSettings.medicationTimes.enumerated() {
+                let parts = time.split(separator: ":").compactMap { Int($0) }
+                guard parts.count == 2 else { continue }
+                let content = UNMutableNotificationContent()
+                content.title = "Medication Reminder"
+                content.body = "Time to take your medication (Dose \(i + 1))."
+                content.sound = .default
+
+                var dateComponents = DateComponents()
+                dateComponents.hour = parts[0]
+                dateComponents.minute = parts[1]
+                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+                let request = UNNotificationRequest(identifier: "med_\(i)", content: content, trigger: trigger)
+                center.add(request)
+            }
+        }
+
+        // Uric acid check reminder
+        if reminderSettings.uricAcidEnabled {
+            let parts = reminderSettings.uricAcidTime.split(separator: ":").compactMap { Int($0) }
+            guard parts.count == 2 else { return }
+            let content = UNMutableNotificationContent()
+            content.title = "Uric Acid Check"
+            content.body = "Time to test and log your uric acid level."
+            content.sound = .default
+
+            var dateComponents = DateComponents()
+            dateComponents.hour = parts[0]
+            dateComponents.minute = parts[1]
+            if reminderSettings.uricAcidFrequency == "weekly" {
+                dateComponents.weekday = reminderSettings.uricAcidDay + 1 // iOS weekday is 1-based, Sunday=1
+            } else {
+                dateComponents.day = reminderSettings.uricAcidDay
+            }
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let request = UNNotificationRequest(identifier: "uric_acid", content: content, trigger: trigger)
+            center.add(request)
+        }
     }
 
     // MARK: - Helpers

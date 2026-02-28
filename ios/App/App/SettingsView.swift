@@ -6,6 +6,9 @@ struct SettingsView: View {
     @State private var showClearConfirm = false
     @State private var showExportShare = false
     @State private var exportData: Data?
+    @State private var showPrivacy = false
+    @State private var showTerms = false
+    @State private var selectedTheme: AppTheme = .dark
 
     var body: some View {
         ScrollView {
@@ -39,6 +42,46 @@ struct SettingsView: View {
                             .cornerRadius(20)
                     }
                     .card()
+                }
+
+                // Appearance
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionLabel(text: "Appearance")
+                    VStack(spacing: 0) {
+                        ForEach(Array(AppTheme.allCases.enumerated()), id: \.element) { index, theme in
+                            Button {
+                                selectedTheme = theme
+                                store.updateProfile { $0.theme = theme.rawValue }
+                            } label: {
+                                HStack {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(themePreviewColor(theme))
+                                        .frame(width: 32, height: 32)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .stroke(GC.borderStrong, lineWidth: 1.5)
+                                        )
+                                    Text(theme.label)
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundColor(GC.text)
+                                    Spacer()
+                                    if selectedTheme == theme {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(GC.accent)
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                                .background(GC.bgCard)
+                            }
+                            if index < AppTheme.allCases.count - 1 {
+                                Divider().background(GC.border)
+                            }
+                        }
+                    }
+                    .cornerRadius(16)
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(GC.border, lineWidth: 1))
                 }
 
                 // Daily Goals
@@ -81,6 +124,9 @@ struct SettingsView: View {
                     }
                     .card()
                 }
+
+                // Reminders
+                remindersSection
 
                 // Gout Stage
                 VStack(alignment: .leading, spacing: 12) {
@@ -139,7 +185,6 @@ struct SettingsView: View {
                                     Text(med.dosage)
                                         .font(.system(size: 12))
                                         .foregroundColor(GC.textTertiary)
-                                    // Show interactions if any
                                     if let interaction = drugInteractions.first(where: { $0.medication.lowercased() == med.name.lowercased() }) {
                                         ForEach(interaction.interactions, id: \.self) { warning in
                                             HStack(spacing: 4) {
@@ -211,10 +256,26 @@ struct SettingsView: View {
                         Text("Version 1.0")
                             .font(.system(size: 13))
                             .foregroundColor(GC.textSecondary)
-                        Text("Your personal gout management companion. Track purine intake, scan foods, monitor uric acid levels, and manage flares.")
+                        Text("AI-powered gout management. Track purines, scan foods, monitor uric acid, and manage flares.")
                             .font(.system(size: 13))
                             .foregroundColor(GC.textTertiary)
                             .padding(.top, 4)
+
+                        HStack(spacing: 16) {
+                            Button { showTerms = true } label: {
+                                Text("Terms of Service")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(GC.accent)
+                                    .underline()
+                            }
+                            Button { showPrivacy = true } label: {
+                                Text("Privacy Policy")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(GC.accent)
+                                    .underline()
+                            }
+                        }
+                        .padding(.top, 8)
                     }
                     .card()
                 }
@@ -223,7 +284,12 @@ struct SettingsView: View {
             .padding(.bottom, 32)
         }
         .background(GC.bg.ignoresSafeArea())
+        .onAppear {
+            selectedTheme = AppTheme(rawValue: store.profile.theme) ?? .dark
+        }
         .sheet(isPresented: $showMedModal) { AddMedicationSheet() }
+        .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
+        .sheet(isPresented: $showTerms) { TermsOfServiceView() }
         .alert("Clear All Data?", isPresented: $showClearConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Clear", role: .destructive) { store.clearAllData() }
@@ -234,6 +300,317 @@ struct SettingsView: View {
             if let data = exportData {
                 ShareSheet(data: data)
             }
+        }
+    }
+
+    // MARK: - Reminders Section
+
+    private var remindersSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionLabel(text: "Reminders")
+
+            // Water Reminders
+            VStack(spacing: 0) {
+                reminderToggleRow(
+                    icon: "drop.fill",
+                    iconColor: GC.cyan,
+                    iconBg: GC.cyanLight,
+                    title: "Water Reminders",
+                    subtitle: "Stay hydrated throughout the day",
+                    isOn: store.reminderSettings.waterEnabled
+                ) { enabled in
+                    toggleReminder(keyPath: \.waterEnabled, enabled: enabled)
+                }
+
+                if store.reminderSettings.waterEnabled {
+                    Divider().background(GC.border)
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Every")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(GC.textSecondary)
+                            Spacer()
+                            Picker("Interval", selection: Binding(
+                                get: { store.reminderSettings.waterIntervalHours },
+                                set: { val in store.updateReminders { $0.waterIntervalHours = val } }
+                            )) {
+                                Text("1 hour").tag(1)
+                                Text("2 hours").tag(2)
+                                Text("3 hours").tag(3)
+                                Text("4 hours").tag(4)
+                            }
+                            .pickerStyle(.menu)
+                            .tint(GC.accent)
+                        }
+                        reminderTimeRow(label: "From", time: Binding(
+                            get: { timeFromString(store.reminderSettings.waterStartTime) },
+                            set: { val in store.updateReminders { $0.waterStartTime = stringFromTime(val) } }
+                        ))
+                        reminderTimeRow(label: "Until", time: Binding(
+                            get: { timeFromString(store.reminderSettings.waterEndTime) },
+                            set: { val in store.updateReminders { $0.waterEndTime = stringFromTime(val) } }
+                        ))
+                    }
+                    .padding(16)
+                }
+            }
+            .background(GC.bgCard)
+            .cornerRadius(16)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(GC.border, lineWidth: 1))
+
+            // Meal Reminders
+            VStack(spacing: 0) {
+                reminderToggleRow(
+                    icon: "fork.knife",
+                    iconColor: GC.warning,
+                    iconBg: GC.warningLight,
+                    title: "Meal Log Reminders",
+                    subtitle: "Log purine intake at mealtimes",
+                    isOn: store.reminderSettings.mealsEnabled
+                ) { enabled in
+                    toggleReminder(keyPath: \.mealsEnabled, enabled: enabled)
+                }
+
+                if store.reminderSettings.mealsEnabled {
+                    Divider().background(GC.border)
+                    VStack(spacing: 12) {
+                        reminderTimeRow(label: "Breakfast", time: Binding(
+                            get: { timeFromString(store.reminderSettings.breakfastTime) },
+                            set: { val in store.updateReminders { $0.breakfastTime = stringFromTime(val) } }
+                        ))
+                        reminderTimeRow(label: "Lunch", time: Binding(
+                            get: { timeFromString(store.reminderSettings.lunchTime) },
+                            set: { val in store.updateReminders { $0.lunchTime = stringFromTime(val) } }
+                        ))
+                        reminderTimeRow(label: "Dinner", time: Binding(
+                            get: { timeFromString(store.reminderSettings.dinnerTime) },
+                            set: { val in store.updateReminders { $0.dinnerTime = stringFromTime(val) } }
+                        ))
+                    }
+                    .padding(16)
+                }
+            }
+            .background(GC.bgCard)
+            .cornerRadius(16)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(GC.border, lineWidth: 1))
+
+            // Medication Reminders
+            VStack(spacing: 0) {
+                reminderToggleRow(
+                    icon: "pills.fill",
+                    iconColor: GC.purple,
+                    iconBg: GC.purple.opacity(0.12),
+                    title: "Medication Reminders",
+                    subtitle: "Never miss a dose",
+                    isOn: store.reminderSettings.medicationEnabled
+                ) { enabled in
+                    toggleReminder(keyPath: \.medicationEnabled, enabled: enabled)
+                }
+
+                if store.reminderSettings.medicationEnabled {
+                    Divider().background(GC.border)
+                    VStack(spacing: 10) {
+                        ForEach(Array(store.reminderSettings.medicationTimes.enumerated()), id: \.offset) { i, time in
+                            HStack {
+                                Text("Dose \(i + 1)")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(GC.textSecondary)
+                                Spacer()
+                                DatePicker("", selection: Binding(
+                                    get: { timeFromString(time) },
+                                    set: { val in store.updateReminders { $0.medicationTimes[i] = stringFromTime(val) } }
+                                ), displayedComponents: .hourAndMinute)
+                                .labelsHidden()
+                                .tint(GC.accent)
+
+                                if store.reminderSettings.medicationTimes.count > 1 {
+                                    Button {
+                                        store.updateReminders { s in
+                                            s.medicationTimes.remove(at: i)
+                                        }
+                                    } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(GC.textTertiary.opacity(0.5))
+                                    }
+                                }
+                            }
+                        }
+
+                        if store.reminderSettings.medicationTimes.count < 6 {
+                            Button {
+                                store.updateReminders { $0.medicationTimes.append("09:00") }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 12, weight: .bold))
+                                    Text("Add another time")
+                                        .font(.system(size: 13, weight: .semibold))
+                                }
+                                .foregroundColor(GC.accent)
+                            }
+                            .padding(.top, 4)
+                        }
+                    }
+                    .padding(16)
+                }
+            }
+            .background(GC.bgCard)
+            .cornerRadius(16)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(GC.border, lineWidth: 1))
+
+            // Uric Acid Check
+            VStack(spacing: 0) {
+                reminderToggleRow(
+                    icon: "bell.fill",
+                    iconColor: GC.accent,
+                    iconBg: GC.accentLight,
+                    title: "Uric Acid Check",
+                    subtitle: "Periodic testing reminders",
+                    isOn: store.reminderSettings.uricAcidEnabled
+                ) { enabled in
+                    toggleReminder(keyPath: \.uricAcidEnabled, enabled: enabled)
+                }
+
+                if store.reminderSettings.uricAcidEnabled {
+                    Divider().background(GC.border)
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("Frequency")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(GC.textSecondary)
+                            Spacer()
+                            Picker("Frequency", selection: Binding(
+                                get: { store.reminderSettings.uricAcidFrequency },
+                                set: { val in store.updateReminders { $0.uricAcidFrequency = val } }
+                            )) {
+                                Text("Weekly").tag("weekly")
+                                Text("Monthly").tag("monthly")
+                            }
+                            .pickerStyle(.menu)
+                            .tint(GC.accent)
+                        }
+
+                        HStack {
+                            Text(store.reminderSettings.uricAcidFrequency == "weekly" ? "Day" : "Day of month")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(GC.textSecondary)
+                            Spacer()
+                            if store.reminderSettings.uricAcidFrequency == "weekly" {
+                                Picker("Day", selection: Binding(
+                                    get: { store.reminderSettings.uricAcidDay },
+                                    set: { val in store.updateReminders { $0.uricAcidDay = val } }
+                                )) {
+                                    ForEach(0..<7) { i in
+                                        Text(["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][i]).tag(i)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .tint(GC.accent)
+                            } else {
+                                Picker("Day", selection: Binding(
+                                    get: { store.reminderSettings.uricAcidDay },
+                                    set: { val in store.updateReminders { $0.uricAcidDay = val } }
+                                )) {
+                                    ForEach(1..<29) { i in
+                                        Text("\(i)").tag(i)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                .tint(GC.accent)
+                            }
+                        }
+
+                        reminderTimeRow(label: "Time", time: Binding(
+                            get: { timeFromString(store.reminderSettings.uricAcidTime) },
+                            set: { val in store.updateReminders { $0.uricAcidTime = stringFromTime(val) } }
+                        ))
+                    }
+                    .padding(16)
+                }
+            }
+            .background(GC.bgCard)
+            .cornerRadius(16)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(GC.border, lineWidth: 1))
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func reminderToggleRow(icon: String, iconColor: Color, iconBg: Color, title: String, subtitle: String, isOn: Bool, onToggle: @escaping (Bool) -> Void) -> some View {
+        HStack {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(iconBg)
+                        .frame(width: 36, height: 36)
+                    Image(systemName: icon)
+                        .font(.system(size: 16))
+                        .foregroundColor(iconColor)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(GC.text)
+                    Text(subtitle)
+                        .font(.system(size: 12))
+                        .foregroundColor(GC.textTertiary)
+                }
+            }
+            Spacer()
+            Toggle("", isOn: Binding(
+                get: { isOn },
+                set: { onToggle($0) }
+            ))
+            .tint(GC.accent)
+            .labelsHidden()
+        }
+        .padding(16)
+    }
+
+    private func reminderTimeRow(label: String, time: Binding<Date>) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(GC.textSecondary)
+            Spacer()
+            DatePicker("", selection: time, displayedComponents: .hourAndMinute)
+                .labelsHidden()
+                .tint(GC.accent)
+        }
+    }
+
+    private func toggleReminder(keyPath: WritableKeyPath<ReminderSettings, Bool>, enabled: Bool) {
+        if enabled {
+            store.requestNotificationPermission { granted in
+                if granted {
+                    store.updateReminders { $0[keyPath: keyPath] = true }
+                }
+            }
+        } else {
+            store.updateReminders { $0[keyPath: keyPath] = false }
+        }
+    }
+
+    private func timeFromString(_ str: String) -> Date {
+        let parts = str.split(separator: ":").compactMap { Int($0) }
+        guard parts.count == 2 else { return Date() }
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        components.hour = parts[0]
+        components.minute = parts[1]
+        return Calendar.current.date(from: components) ?? Date()
+    }
+
+    private func stringFromTime(_ date: Date) -> String {
+        let comps = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return String(format: "%02d:%02d", comps.hour ?? 0, comps.minute ?? 0)
+    }
+
+    private func themePreviewColor(_ theme: AppTheme) -> Color {
+        switch theme {
+        case .dark: return Color(hex: 0x1A1A2E)
+        case .light: return Color(hex: 0xF0F2F5)
+        case .system: return Color(hex: 0x888888)
         }
     }
 

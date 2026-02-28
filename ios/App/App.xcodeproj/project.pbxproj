@@ -20,6 +20,8 @@
 		AA000000000000000000000B /* TrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001B /* TrackerView.swift */; };
 		AA000000000000000000000C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001C /* SettingsView.swift */; };
 		AA000000000000000000000D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001D /* OnboardingView.swift */; };
+		AA000000000000000000000E /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001E /* PrivacyPolicyView.swift */; };
+		AA000000000000000000000F /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000001F /* TermsOfServiceView.swift */; };
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -38,6 +40,8 @@
 		AA000000000000000000001B /* TrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerView.swift; sourceTree = "<group>"; };
 		AA000000000000000000001C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA000000000000000000001D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		AA000000000000000000001E /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		AA000000000000000000001F /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -87,6 +91,8 @@
 				AA000000000000000000001B /* TrackerView.swift */,
 				AA000000000000000000001C /* SettingsView.swift */,
 				AA000000000000000000001D /* OnboardingView.swift */,
+				AA000000000000000000001E /* PrivacyPolicyView.swift */,
+				AA000000000000000000001F /* TermsOfServiceView.swift */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
 				504EC3131FED79650016851F /* Info.plist */,
@@ -177,6 +183,8 @@
 				AA000000000000000000000B /* TrackerView.swift in Sources */,
 				AA000000000000000000000C /* SettingsView.swift in Sources */,
 				AA000000000000000000000D /* OnboardingView.swift in Sources */,
+				AA000000000000000000000E /* PrivacyPolicyView.swift in Sources */,
+				AA000000000000000000000F /* TermsOfServiceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

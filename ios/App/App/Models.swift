@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - Enums
 
@@ -316,6 +317,65 @@ let drugInteractions: [DrugInteraction] = [
 ]
 
 let medicationPresets = ["Allopurinol", "Febuxostat", "Colchicine", "Indomethacin", "Naproxen", "Ibuprofen", "Prednisone", "Probenecid", "Pegloticase"]
+
+// MARK: - Theme
+enum AppTheme: String, Codable, CaseIterable {
+    case dark, light, system
+
+    var label: String {
+        switch self {
+        case .dark: return "Dark"
+        case .light: return "Light"
+        case .system: return "System"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .dark: return .dark
+        case .light: return .light
+        case .system: return nil
+        }
+    }
+}
+
+// MARK: - Reminder Settings
+struct ReminderSettings: Codable {
+    var waterEnabled: Bool
+    var waterIntervalHours: Int
+    var waterStartTime: String
+    var waterEndTime: String
+
+    var mealsEnabled: Bool
+    var breakfastTime: String
+    var lunchTime: String
+    var dinnerTime: String
+
+    var medicationEnabled: Bool
+    var medicationTimes: [String]
+
+    var uricAcidEnabled: Bool
+    var uricAcidFrequency: String // "weekly" or "monthly"
+    var uricAcidDay: Int
+    var uricAcidTime: String
+
+    init() {
+        self.waterEnabled = false
+        self.waterIntervalHours = 2
+        self.waterStartTime = "08:00"
+        self.waterEndTime = "21:00"
+        self.mealsEnabled = false
+        self.breakfastTime = "08:00"
+        self.lunchTime = "12:00"
+        self.dinnerTime = "18:30"
+        self.medicationEnabled = false
+        self.medicationTimes = ["09:00"]
+        self.uricAcidEnabled = false
+        self.uricAcidFrequency = "weekly"
+        self.uricAcidDay = 1
+        self.uricAcidTime = "09:00"
+    }
+}
 
 // MARK: - Constants
 struct Constants {
