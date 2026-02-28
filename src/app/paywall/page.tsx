@@ -1,21 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckIcon, CrownIcon } from '@/components/icons';
-import { purchaseProduct } from '@/lib/subscription';
+import { purchaseProduct, startTrial } from '@/lib/subscription';
+import { getUserProfile } from '@/lib/storage';
 import { PRODUCT_IDS } from '@/lib/constants';
 
-type Plan = 'monthly' | 'annual';
+type Plan = 'trial' | 'monthly' | 'annual';
 
 export default function PaywallPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<Plan>('annual');
   const [loading, setLoading] = useState(false);
+  const [canTrial, setCanTrial] = useState(false);
+
+  useEffect(() => {
+    const profile = getUserProfile();
+    // Allow trial if user has never started one
+    if (!profile.trialStartDate) {
+      setCanTrial(true);
+      setSelected('trial');
+    }
+  }, []);
 
   const handleSubscribe = async () => {
     setLoading(true);
     try {
+      if (selected === 'trial') {
+        startTrial();
+        router.replace('/');
+        return;
+      }
       const productId = selected === 'monthly' ? PRODUCT_IDS.monthly : PRODUCT_IDS.annual;
       const success = await purchaseProduct(productId);
       if (success) {
@@ -58,6 +74,21 @@ export default function PaywallPage() {
 
         {/* Plan Cards */}
         <div style={styles.plans}>
+          {/* Trial — only if never used */}
+          {canTrial && (
+            <button
+              onClick={() => setSelected('trial')}
+              style={{ ...styles.planCard, ...(selected === 'trial' ? styles.planSelected : {}) }}
+            >
+              <div style={styles.planTop}>
+                <span style={styles.planName}>7-Day Free Trial</span>
+                {selected === 'trial' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
+              </div>
+              <span style={styles.planPrice}>$0.00</span>
+              <span style={styles.planDetail}>Full access for 7 days, cancel anytime</span>
+            </button>
+          )}
+
           {/* Monthly */}
           <button
             onClick={() => setSelected('monthly')}
@@ -89,10 +120,10 @@ export default function PaywallPage() {
         {/* CTA */}
         <button onClick={handleSubscribe} disabled={loading} style={styles.cta}>
           <CrownIcon size={20} color="#1e3a5f" />
-          <span>{loading ? 'Processing...' : 'Subscribe Now'}</span>
+          <span>{loading ? 'Processing...' : selected === 'trial' ? 'Start Free Trial' : 'Subscribe Now'}</span>
         </button>
 
-        <p style={styles.cancel}>Cancel anytime. Subscription renews automatically.</p>
+        <p style={styles.cancel}>{selected === 'trial' ? 'No charge during trial. Cancel anytime.' : 'Cancel anytime. Subscription renews automatically.'}</p>
 
         <div style={styles.legal}>
           <span style={styles.legalLink}>Terms of Service</span>
