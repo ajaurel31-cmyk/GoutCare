@@ -10,7 +10,6 @@ enum StoreProduct: String, CaseIterable {
 }
 
 // MARK: - Store Manager (StoreKit 2)
-@MainActor
 class StoreManager: ObservableObject {
     static let shared = StoreManager()
 
@@ -177,6 +176,7 @@ class StoreManager: ObservableObject {
     // MARK: - Manage Subscription
 
     /// Open system subscription management
+    @MainActor
     func showManageSubscription() async {
         guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
         try? await AppStore.showManageSubscriptions(in: scene)
