@@ -217,12 +217,9 @@ struct SettingsView: View {
                         guard !isExporting else { return }
                         isExporting = true
                         DispatchQueue.global(qos: .userInitiated).async {
-                            guard let data = store.exportAllData() else {
-                                DispatchQueue.main.async { isExporting = false }
-                                return
-                            }
-                            let url = FileManager.default.temporaryDirectory.appendingPathComponent("goutcare-backup-\(Date().dateKey).json")
-                            try? data.write(to: url)
+                            let pdfData = store.exportPDFReport()
+                            let url = FileManager.default.temporaryDirectory.appendingPathComponent("GoutCare-Report-\(Date().dateKey).pdf")
+                            try? pdfData.write(to: url)
                             DispatchQueue.main.async {
                                 isExporting = false
                                 presentShareSheet(url: url)
@@ -230,10 +227,19 @@ struct SettingsView: View {
                         }
                     } label: {
                         HStack {
-                            Image(systemName: "square.and.arrow.up").foregroundColor(GC.accent)
-                            Text("Export All Data").foregroundColor(GC.text)
+                            Image(systemName: "doc.text").foregroundColor(GC.accent)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Export Health Report").foregroundColor(GC.text)
+                                Text("PDF report to share with your doctor")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(GC.textTertiary)
+                            }
                             Spacer()
-                            Image(systemName: "chevron.right").foregroundColor(GC.textTertiary)
+                            if isExporting {
+                                ProgressView().tint(GC.accent)
+                            } else {
+                                Image(systemName: "chevron.right").foregroundColor(GC.textTertiary)
+                            }
                         }
                         .font(.system(size: 15, weight: .medium))
                         .padding(14)

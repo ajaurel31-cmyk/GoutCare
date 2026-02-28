@@ -197,6 +197,196 @@ class DataStore: ObservableObject {
         return try? JSONSerialization.data(withJSONObject: export, options: .prettyPrinted)
     }
 
+    func exportPDFReport() -> Data {
+        let pageWidth: CGFloat = 612
+        let pageHeight: CGFloat = 792
+        let margin: CGFloat = 50
+        let contentWidth = pageWidth - margin * 2
+
+        let pdfData = NSMutableData()
+        var mediaBox = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+
+        guard let consumer = CGDataConsumer(data: pdfData as CFMutableData),
+              let context = CGContext(consumer: consumer, mediaBox: &mediaBox, nil) else {
+            return Data()
+        }
+
+        var cursorY: CGFloat = 0
+
+        func startPage() {
+            context.beginPage(mediaBox: &mediaBox)
+            cursorY = pageHeight - margin
+        }
+
+        func checkPageBreak(_ needed: CGFloat) {
+            if cursorY - needed < margin {
+                context.endPage()
+                startPage()
+            }
+        }
+
+        func drawText(_ text: String, x: CGFloat, fontSize: CGFloat, weight: UIFont.Weight = .regular, color: UIColor = .black, maxWidth: CGFloat = 0) {
+            let font = UIFont.systemFont(ofSize: fontSize, weight: weight)
+            let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
+            let w = maxWidth > 0 ? maxWidth : contentWidth
+            let attrStr = NSAttributedString(string: text, attributes: attributes)
+            let framesetter = CTFramesetterCreateWithAttributedString(attrStr)
+            let fitSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, CFRange(location: 0, length: attrStr.length), nil, CGSize(width: w, height: .greatestFiniteMagnitude), nil)
+            let path = CGPath(rect: CGRect(x: x, y: cursorY - fitSize.height, width: w, height: fitSize.height), transform: nil)
+            let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: 0, length: 0), path, nil)
+            context.saveGState()
+            CTFrameDraw(frame, context)
+            context.restoreGState()
+            cursorY -= fitSize.height
+        }
+
+        func drawLine() {
+            checkPageBreak(20)
+            cursorY -= 8
+            context.setStrokeColor(UIColor.lightGray.cgColor)
+            context.setLineWidth(0.5)
+            context.move(to: CGPoint(x: margin, y: cursorY))
+            context.addLine(to: CGPoint(x: pageWidth - margin, y: cursorY))
+            context.strokePath()
+            cursorY -= 8
+        }
+
+        let dateFmt = DateFormatter()
+        dateFmt.dateFormat = "MMM d, yyyy"
+        let timeFmt = DateFormatter()
+        timeFmt.dateFormat = "MMM d, yyyy 'at' h:mm a"
+
+        // --- Page 1 ---
+        startPage()
+
+        // Header
+        drawText("GoutCare Health Report", x: margin, fontSize: 22, weight: .bold, color: UIColor(red: 0.23, green: 0.51, blue: 0.96, alpha: 1))
+        cursorY -= 4
+        drawText("Generated \(timeFmt.string(from: Date()))", x: margin, fontSize: 11, color: .gray)
+        cursorY -= 4
+        drawText("This report is intended for informational purposes. Please share with your healthcare provider.", x: margin, fontSize: 10, color: .gray)
+        drawLine()
+
+        // Profile Summary
+        drawText("Patient Profile", x: margin, fontSize: 16, weight: .bold)
+        cursorY -= 6
+        drawText("Gout Stage: \(profile.goutStage.label)", x: margin, fontSize: 12)
+        cursorY -= 2
+        drawText("Daily Purine Target: \(profile.purineTarget) mg", x: margin, fontSize: 12)
+        cursorY -= 2
+        drawText("Daily Water Goal: \(profile.waterGoal) oz", x: margin, fontSize: 12)
+        drawLine()
+
+        // Medications
+        drawText("Current Medications", x: margin, fontSize: 16, weight: .bold)
+        cursorY -= 6
+        if medications.isEmpty {
+            drawText("None listed", x: margin, fontSize: 12, color: .gray)
+        } else {
+            for med in medications where med.isActive {
+                let dosageStr = med.dosage.isEmpty ? "" : " — \(med.dosage)"
+                drawText("• \(med.name)\(dosageStr)", x: margin, fontSize: 12)
+                cursorY -= 2
+            }
+        }
+        drawLine()
+
+        // Uric Acid Readings
+        drawText("Uric Acid History", x: margin, fontSize: 16, weight: .bold)
+        cursorY -= 6
+        if uricAcidReadings.isEmpty {
+            drawText("No readings recorded", x: margin, fontSize: 12, color: .gray)
+        } else {
+            // Table header
+            drawText("Date", x: margin, fontSize: 11, weight: .semibold, color: .gray)
+            cursorY += 14 // move back up to draw on same line
+            drawText("Value (mg/dL)", x: margin + 160, fontSize: 11, weight: .semibold, color: .gray)
+            cursorY += 14
+            drawText("Status", x: margin + 300, fontSize: 11, weight: .semibold, color: .gray)
+            cursorY -= 4
+
+            for reading in uricAcidReadings.prefix(20) {
+                checkPageBreak(18)
+                let status = reading.value <= 6.0 ? "Normal" : reading.value <= 7.0 ? "Elevated" : "High"
+                let statusColor = reading.value <= 6.0 ? UIColor.systemGreen : reading.value <= 7.0 ? UIColor.systemOrange : UIColor.systemRed
+                drawText(dateFmt.string(from: reading.date), x: margin, fontSize: 11)
+                cursorY += 14
+                drawText(String(format: "%.1f", reading.value), x: margin + 160, fontSize: 11)
+                cursorY += 14
+                drawText(status, x: margin + 300, fontSize: 11, weight: .medium, color: statusColor)
+                cursorY -= 2
+            }
+            if uricAcidReadings.count > 20 {
+                cursorY -= 2
+                drawText("... and \(uricAcidReadings.count - 20) more readings", x: margin, fontSize: 10, color: .gray)
+            }
+        }
+        drawLine()
+
+        // Gout Flares
+        checkPageBreak(60)
+        drawText("Gout Flare History", x: margin, fontSize: 16, weight: .bold)
+        cursorY -= 6
+        if goutFlares.isEmpty {
+            drawText("No flares recorded", x: margin, fontSize: 12, color: .gray)
+        } else {
+            for flare in goutFlares.prefix(15) {
+                checkPageBreak(50)
+                let joints = flare.joints.map(\.label).joined(separator: ", ")
+                drawText("\(dateFmt.string(from: flare.date)) — Pain: \(flare.painLevel)/10", x: margin, fontSize: 12, weight: .medium)
+                cursorY -= 2
+                drawText("Joints: \(joints)", x: margin + 16, fontSize: 11, color: .darkGray)
+                if !flare.triggers.isEmpty {
+                    cursorY -= 2
+                    drawText("Triggers: \(flare.triggers.map(\.label).joined(separator: ", "))", x: margin + 16, fontSize: 11, color: .darkGray)
+                }
+                if !flare.treatments.isEmpty {
+                    cursorY -= 2
+                    drawText("Treatments: \(flare.treatments.map(\.label).joined(separator: ", "))", x: margin + 16, fontSize: 11, color: .darkGray)
+                }
+                cursorY -= 6
+            }
+            if goutFlares.count > 15 {
+                drawText("... and \(goutFlares.count - 15) more flares", x: margin, fontSize: 10, color: .gray)
+            }
+        }
+        drawLine()
+
+        // Recent Food Log (last 7 days)
+        checkPageBreak(60)
+        drawText("Recent Food Log (Last 7 Days)", x: margin, fontSize: 16, weight: .bold)
+        cursorY -= 6
+        var hasFood = false
+        for dayOffset in 0..<7 {
+            guard let date = Calendar.current.date(byAdding: .day, value: -dayOffset, to: Date()) else { continue }
+            let log = getDailyLog(for: date)
+            if log.foods.isEmpty { continue }
+            hasFood = true
+            checkPageBreak(30)
+            drawText("\(dateFmt.string(from: date)) — Total: \(log.totalPurine) mg purine", x: margin, fontSize: 12, weight: .medium)
+            cursorY -= 2
+            for food in log.foods {
+                checkPageBreak(16)
+                drawText("• \(food.name) (\(food.servingSize)) — \(food.purineContent) mg", x: margin + 16, fontSize: 11, color: .darkGray)
+                cursorY -= 1
+            }
+            cursorY -= 4
+        }
+        if !hasFood {
+            drawText("No food entries in the last 7 days", x: margin, fontSize: 12, color: .gray)
+        }
+
+        // Footer
+        checkPageBreak(40)
+        drawLine()
+        drawText("Generated by GoutCare v1.0 • This is not medical advice", x: margin, fontSize: 9, color: .lightGray)
+
+        context.endPage()
+        context.closePDF()
+
+        return pdfData as Data
+    }
+
     func clearAllData() {
         for key in defaults.dictionaryRepresentation().keys where key.hasPrefix("gc_") {
             defaults.removeObject(forKey: key)
