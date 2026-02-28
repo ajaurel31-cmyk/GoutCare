@@ -9,6 +9,7 @@ import {
   Medication,
   DoseLog,
   SubscriptionStatus,
+  ReminderSettings,
 } from './types';
 import {
   DEFAULT_PURINE_TARGET,
@@ -29,6 +30,7 @@ const KEYS = {
   SCAN_COUNT_PREFIX: 'goutcare_scan_count_',
   SUBSCRIPTION: 'goutcare_subscription',
   MEAL_FAVORITES: 'goutcare_meal_favorites',
+  REMINDERS: 'goutcare_reminders',
 } as const;
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -298,6 +300,40 @@ export function toggleMealFavorite(mealId: string): string[] {
   }
   setItem(KEYS.MEAL_FAVORITES, favorites);
   return favorites;
+}
+
+// ─── Reminders ─────────────────────────────────────────────────────────────
+
+const DEFAULT_REMINDERS: ReminderSettings = {
+  waterEnabled: false,
+  waterIntervalHours: 2,
+  waterStartTime: '08:00',
+  waterEndTime: '22:00',
+
+  mealsEnabled: false,
+  breakfastTime: '08:00',
+  lunchTime: '12:00',
+  dinnerTime: '18:00',
+
+  medicationEnabled: false,
+  medicationTimes: ['09:00'],
+
+  uricAcidEnabled: false,
+  uricAcidFrequency: 'weekly',
+  uricAcidDay: 1, // Monday
+  uricAcidTime: '09:00',
+};
+
+export function getReminderSettings(): ReminderSettings {
+  const settings = getItem<ReminderSettings>(KEYS.REMINDERS);
+  return settings ? { ...DEFAULT_REMINDERS, ...settings } : { ...DEFAULT_REMINDERS };
+}
+
+export function updateReminderSettings(updates: Partial<ReminderSettings>): ReminderSettings {
+  const current = getReminderSettings();
+  const updated = { ...current, ...updates };
+  setItem(KEYS.REMINDERS, updated);
+  return updated;
 }
 
 // ─── Export All Data ────────────────────────────────────────────────────────

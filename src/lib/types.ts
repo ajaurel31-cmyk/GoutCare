@@ -121,3 +121,23 @@ export interface MealSuggestion {
   dietaryTags: DietaryPreference[];
   isFavorite: boolean;
 }
+
+export interface ReminderSettings {
+  waterEnabled: boolean;
+  waterIntervalHours: number;
+  waterStartTime: string;
+  waterEndTime: string;
+
+  mealsEnabled: boolean;
+  breakfastTime: string;
+  lunchTime: string;
+  dinnerTime: string;
+
+  medicationEnabled: boolean;
+  medicationTimes: string[];
+
+  uricAcidEnabled: boolean;
+  uricAcidFrequency: 'weekly' | 'monthly';
+  uricAcidDay: number;
+  uricAcidTime: string;
+}

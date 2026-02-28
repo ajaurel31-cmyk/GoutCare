@@ -15,3 +15,4 @@ export { default as CrownIcon } from './CrownIcon';
 export { default as ForkKnifeIcon } from './ForkKnifeIcon';
 export { default as AlertIcon } from './AlertIcon';
 export { default as PillIcon } from './PillIcon';
+export { default as BellIcon } from './BellIcon';

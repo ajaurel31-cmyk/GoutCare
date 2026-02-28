@@ -9,6 +9,9 @@ import {
   ChevronIcon,
   AlertIcon,
   CrownIcon,
+  BellIcon,
+  DropletIcon,
+  ForkKnifeIcon,
 } from '@/components/icons';
 import {
   getUserProfile,
@@ -17,7 +20,14 @@ import {
   getMedications,
   addMedication,
   deleteMedication,
+  getReminderSettings,
+  updateReminderSettings,
 } from '@/lib/storage';
+import {
+  requestPermission,
+  scheduleAllReminders,
+  cancelAllReminders,
+} from '@/lib/notifications';
 import { isSubscribed, isTrialActive, getTrialDaysRemaining } from '@/lib/subscription';
 import { useTheme } from '@/hooks/useTheme';
 import {
@@ -26,7 +36,7 @@ import {
   MEDICATION_PRESETS,
   DRUG_INTERACTIONS,
 } from '@/lib/constants';
-import type { UserProfile, GoutStage, Medication } from '@/lib/types';
+import type { UserProfile, GoutStage, Medication, ReminderSettings } from '@/lib/types';
 import Link from 'next/link';
 
 type ModalType = 'medication' | null;
@@ -40,6 +50,7 @@ const GOUT_STAGES: { value: GoutStage; label: string; desc: string }[] = [
 export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [meds, setMeds] = useState<Medication[]>([]);
+  const [reminders, setReminders] = useState<ReminderSettings | null>(null);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -48,12 +59,54 @@ export default function SettingsPage() {
   const refresh = useCallback(() => {
     setProfile(getUserProfile());
     setMeds(getMedications());
+    setReminders(getReminderSettings());
   }, []);
 
   useEffect(() => {
     refresh();
     setMounted(true);
   }, [refresh]);
+
+  const updateReminder = async <K extends keyof ReminderSettings>(key: K, value: ReminderSettings[K]) => {
+    const updated = updateReminderSettings({ [key]: value });
+    setReminders(updated);
+
+    // Check if any reminder is enabled
+    const anyEnabled = updated.waterEnabled || updated.mealsEnabled || updated.medicationEnabled || updated.uricAcidEnabled;
+
+    if (anyEnabled) {
+      const granted = await requestPermission();
+      if (!granted) {
+        showToast('Please enable notifications in your device settings');
+        // Revert the toggle
+        const reverted = updateReminderSettings({ [key]: false });
+        setReminders(reverted);
+        return;
+      }
+      await scheduleAllReminders();
+    } else {
+      await cancelAllReminders();
+    }
+  };
+
+  const addMedicationTime = () => {
+    if (!reminders) return;
+    const times = [...reminders.medicationTimes, '09:00'];
+    updateReminder('medicationTimes', times);
+  };
+
+  const updateMedicationTime = (index: number, value: string) => {
+    if (!reminders) return;
+    const times = [...reminders.medicationTimes];
+    times[index] = value;
+    updateReminder('medicationTimes', times);
+  };
+
+  const removeMedicationTime = (index: number) => {
+    if (!reminders) return;
+    const times = reminders.medicationTimes.filter((_, i) => i !== index);
+    updateReminder('medicationTimes', times.length > 0 ? times : ['09:00']);
+  };
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -228,6 +281,251 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Reminders ──────────────────────────────────────────── */}
+      {reminders && (
+        <div className="section">
+          <div className="section-label">Reminders</div>
+
+          {/* Water Reminders */}
+          <div className="card" style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: reminders.waterEnabled ? 14 : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 'var(--radius-md)',
+                  background: 'var(--cyan-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  <DropletIcon size={18} color="var(--cyan)" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>Water Reminders</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Stay hydrated throughout the day</div>
+                </div>
+              </div>
+              <button
+                className={`toggle ${reminders.waterEnabled ? 'toggle-active' : ''}`}
+                onClick={() => updateReminder('waterEnabled', !reminders.waterEnabled)}
+              />
+            </div>
+            {reminders.waterEnabled && (
+              <div style={{ paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Every</label>
+                  <select
+                    className="reminder-select"
+                    value={reminders.waterIntervalHours}
+                    onChange={(e) => updateReminder('waterIntervalHours', Number(e.target.value))}
+                  >
+                    <option value={1}>1 hour</option>
+                    <option value={2}>2 hours</option>
+                    <option value={3}>3 hours</option>
+                    <option value={4}>4 hours</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>From</label>
+                  <input
+                    type="time"
+                    className="reminder-time"
+                    value={reminders.waterStartTime}
+                    onChange={(e) => updateReminder('waterStartTime', e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Until</label>
+                  <input
+                    type="time"
+                    className="reminder-time"
+                    value={reminders.waterEndTime}
+                    onChange={(e) => updateReminder('waterEndTime', e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Meal / Purine Reminders */}
+          <div className="card" style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: reminders.mealsEnabled ? 14 : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 'var(--radius-md)',
+                  background: 'var(--warning-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  <ForkKnifeIcon size={18} color="var(--warning)" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>Meal Log Reminders</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Log purine intake at mealtimes</div>
+                </div>
+              </div>
+              <button
+                className={`toggle ${reminders.mealsEnabled ? 'toggle-active' : ''}`}
+                onClick={() => updateReminder('mealsEnabled', !reminders.mealsEnabled)}
+              />
+            </div>
+            {reminders.mealsEnabled && (
+              <div style={{ paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Breakfast</label>
+                  <input
+                    type="time"
+                    className="reminder-time"
+                    value={reminders.breakfastTime}
+                    onChange={(e) => updateReminder('breakfastTime', e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Lunch</label>
+                  <input
+                    type="time"
+                    className="reminder-time"
+                    value={reminders.lunchTime}
+                    onChange={(e) => updateReminder('lunchTime', e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Dinner</label>
+                  <input
+                    type="time"
+                    className="reminder-time"
+                    value={reminders.dinnerTime}
+                    onChange={(e) => updateReminder('dinnerTime', e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Medication Reminders */}
+          <div className="card" style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: reminders.medicationEnabled ? 14 : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 'var(--radius-md)',
+                  background: 'rgba(139, 92, 246, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  <PillIcon size={18} color="var(--purple)" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>Medication Reminders</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Never miss a dose</div>
+                </div>
+              </div>
+              <button
+                className={`toggle ${reminders.medicationEnabled ? 'toggle-active' : ''}`}
+                onClick={() => updateReminder('medicationEnabled', !reminders.medicationEnabled)}
+              />
+            </div>
+            {reminders.medicationEnabled && (
+              <div style={{ paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {reminders.medicationTimes.map((time, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                    <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Dose {i + 1}</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <input
+                        type="time"
+                        className="reminder-time"
+                        value={time}
+                        onChange={(e) => updateMedicationTime(i, e.target.value)}
+                      />
+                      {reminders.medicationTimes.length > 1 && (
+                        <button onClick={() => removeMedicationTime(i)} style={{ padding: 4, opacity: 0.5 }}>
+                          <CloseIcon size={14} color="var(--text-tertiary)" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {reminders.medicationTimes.length < 6 && (
+                  <button
+                    onClick={addMedicationTime}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600,
+                      color: 'var(--accent)', padding: '6px 0',
+                    }}
+                  >
+                    <PlusIcon size={14} color="var(--accent)" />
+                    Add another time
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Uric Acid Reminder */}
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: reminders.uricAcidEnabled ? 14 : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 'var(--radius-md)',
+                  background: 'var(--accent-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  <BellIcon size={18} color="var(--accent)" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>Uric Acid Check</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Periodic testing reminders</div>
+                </div>
+              </div>
+              <button
+                className={`toggle ${reminders.uricAcidEnabled ? 'toggle-active' : ''}`}
+                onClick={() => updateReminder('uricAcidEnabled', !reminders.uricAcidEnabled)}
+              />
+            </div>
+            {reminders.uricAcidEnabled && (
+              <div style={{ paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Frequency</label>
+                  <select
+                    className="reminder-select"
+                    value={reminders.uricAcidFrequency}
+                    onChange={(e) => updateReminder('uricAcidFrequency', e.target.value as 'weekly' | 'monthly')}
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+                    {reminders.uricAcidFrequency === 'weekly' ? 'Day' : 'Day of month'}
+                  </label>
+                  {reminders.uricAcidFrequency === 'weekly' ? (
+                    <select
+                      className="reminder-select"
+                      value={reminders.uricAcidDay}
+                      onChange={(e) => updateReminder('uricAcidDay', Number(e.target.value))}
+                    >
+                      {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((d, i) => (
+                        <option key={d} value={i}>{d}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <select
+                      className="reminder-select"
+                      value={reminders.uricAcidDay}
+                      onChange={(e) => updateReminder('uricAcidDay', Number(e.target.value))}
+                    >
+                      {Array.from({ length: 28 }, (_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Time</label>
+                  <input
+                    type="time"
+                    className="reminder-time"
+                    value={reminders.uricAcidTime}
+                    onChange={(e) => updateReminder('uricAcidTime', e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Gout Stage ──────────────────────────────────────────── */}
       <div className="section">
