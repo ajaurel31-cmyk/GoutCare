@@ -5,8 +5,10 @@ const config: CapacitorConfig = {
   appName: 'GoutCare',
   webDir: 'out',
   server: {
-    url: 'https://goutcare.vercel.app',
-    cleartext: false,
+    // For local Xcode testing: use http://localhost:3000
+    // For production: use https://goutcare.vercel.app
+    url: 'http://localhost:3000',
+    cleartext: true,
   },
   ios: {
     scheme: 'GoutCare',
