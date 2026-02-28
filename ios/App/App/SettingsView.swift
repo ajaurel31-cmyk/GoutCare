@@ -4,7 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject var store: DataStore
     @State private var showMedModal = false
     @State private var showClearConfirm = false
-    @State private var exportFileURL: URL?
+    @State private var isExporting = false
     @State private var showPrivacy = false
     @State private var showTerms = false
     @State private var selectedTheme: AppTheme = .dark
@@ -214,10 +214,19 @@ struct SettingsView: View {
                     SectionLabel(text: "Data")
 
                     Button {
-                        if let data = store.exportAllData() {
+                        guard !isExporting else { return }
+                        isExporting = true
+                        DispatchQueue.global(qos: .userInitiated).async {
+                            guard let data = store.exportAllData() else {
+                                DispatchQueue.main.async { isExporting = false }
+                                return
+                            }
                             let url = FileManager.default.temporaryDirectory.appendingPathComponent("goutcare-backup-\(Date().dateKey).json")
                             try? data.write(to: url)
-                            exportFileURL = url
+                            DispatchQueue.main.async {
+                                isExporting = false
+                                presentShareSheet(url: url)
+                            }
                         }
                     } label: {
                         HStack {
@@ -297,9 +306,6 @@ struct SettingsView: View {
             Button("Clear", role: .destructive) { store.clearAllData() }
         } message: {
             Text("This will permanently delete all your data. This cannot be undone.")
-        }
-        .sheet(item: $exportFileURL) { url in
-            ShareSheet(url: url)
         }
     }
 
@@ -710,18 +716,12 @@ struct AddMedicationSheet: View {
     }
 }
 
-// MARK: - URL + Identifiable
-extension URL: @retroactive Identifiable {
-    public var id: String { absoluteString }
-}
-
-// MARK: - Share Sheet
-struct ShareSheet: UIViewControllerRepresentable {
-    let url: URL
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: [url], applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+// MARK: - Share Helper
+private func presentShareSheet(url: URL) {
+    let avc = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+    guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+          let root = scene.windows.first?.rootViewController else { return }
+    let presenter = root.presentedViewController ?? root
+    avc.popoverPresentationController?.sourceView = presenter.view
+    presenter.present(avc, animated: true)
 }
