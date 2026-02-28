@@ -1,5 +1,5 @@
 {
-  "identifier" : "A1B2C3D4",
+  "identifier" : "8F71C3E4-A5B2-4D8C-9E7F-1A2B3C4D5E6F",
   "nonRenewingSubscriptions" : [
 
   ],
@@ -34,7 +34,7 @@
   },
   "subscriptionGroups" : [
     {
-      "id" : "GoutCarePremium",
+      "id" : "21537845",
       "localizations" : [
 
       ],
@@ -50,7 +50,7 @@
           "displayPrice" : "4.99",
           "familyShareable" : false,
           "groupNumber" : 1,
-          "internalID" : "MONTHLY001",
+          "internalID" : "6B2A9F31-E4C7-4D8A-B5F1-9C3E7A2D1B04",
           "introductoryOffer" : null,
           "localizations" : [
             {
@@ -62,7 +62,7 @@
           "productID" : "com.goutcare.app.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Monthly Subscription",
-          "subscriptionGroupID" : "GoutCarePremium",
+          "subscriptionGroupID" : "21537845",
           "type" : "RecurringSubscription"
         },
         {
@@ -75,11 +75,11 @@
           "displayPrice" : "29.99",
           "familyShareable" : false,
           "groupNumber" : 1,
-          "internalID" : "ANNUAL001",
+          "internalID" : "A4D8E2C6-7B1F-4A93-8E5D-2F6C9B3A7D15",
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Full access billed annually — save 50%",
+              "description" : "Full access billed annually - save 50%",
               "displayName" : "GoutCare Annual",
               "locale" : "en_US"
             }
@@ -87,7 +87,7 @@
           "productID" : "com.goutcare.app.annual",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Annual Subscription",
-          "subscriptionGroupID" : "GoutCarePremium",
+          "subscriptionGroupID" : "21537845",
           "type" : "RecurringSubscription"
         }
       ]
