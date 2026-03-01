@@ -123,6 +123,35 @@ body {
   padding-top: var(--safe-top);
 }
 
+/* === DESKTOP WRAPPER — phone-like frame on wide screens === */
+@media (min-width: 500px) {
+  html { background: #050810; }
+  html[data-theme="light"] { background: #e2e6ec; }
+
+  body {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    box-shadow: 0 0 80px rgba(59, 130, 246, 0.08), 0 0 0 1px var(--border);
+    border-radius: 0;
+  }
+
+  .bottom-nav {
+    max-width: 430px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .toast {
+    max-width: 390px;
+  }
+
+  .fab {
+    right: calc(50% - 215px + 20px);
+  }
+}
+
 /* === SECTION === */
 .section { margin-bottom: 24px; }
 
@@ -461,4 +490,12 @@ body.capacitor textarea {
 /* === RESPONSIVE === */
 @media (max-width: 375px) {
   .page { padding: calc(var(--safe-top) + 12px) 14px calc(var(--nav-height) + var(--safe-bottom) + 24px); }
+}
+
+@media (min-width: 500px) {
+  .modal-overlay {
+    max-width: 430px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
