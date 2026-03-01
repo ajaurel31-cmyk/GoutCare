@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var isExporting = false
     @State private var showPrivacy = false
     @State private var showTerms = false
+    @State private var showEULA = false
     @State private var selectedTheme: AppTheme = .dark
 
     var body: some View {
@@ -334,6 +335,12 @@ struct SettingsView: View {
                                     .foregroundColor(GC.accent)
                                     .underline()
                             }
+                            Button { showEULA = true } label: {
+                                Text("EULA")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(GC.accent)
+                                    .underline()
+                            }
                         }
                         .padding(.top, 8)
                     }
@@ -350,6 +357,7 @@ struct SettingsView: View {
         .sheet(isPresented: $showMedModal) { AddMedicationSheet() }
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
         .sheet(isPresented: $showTerms) { TermsOfServiceView() }
+        .sheet(isPresented: $showEULA) { EULAView() }
         .alert("Clear All Data?", isPresented: $showClearConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Clear", role: .destructive) { store.clearAllData() }

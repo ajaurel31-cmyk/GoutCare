@@ -10,6 +10,7 @@ struct OnboardingView: View {
     @State private var errorMessage: String?
     @State private var showPrivacy = false
     @State private var showTerms = false
+    @State private var showEULA = false
 
     private var storeManager: StoreManager { store.storeManager }
 
@@ -162,6 +163,12 @@ struct OnboardingView: View {
                             .foregroundColor(GC.accent)
                             .underline()
                     }
+                    Button { showEULA = true } label: {
+                        Text("EULA")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(GC.accent)
+                            .underline()
+                    }
                 }
             }
             .padding(.horizontal, 24)
@@ -170,6 +177,7 @@ struct OnboardingView: View {
         .background(GC.bg.ignoresSafeArea())
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
         .sheet(isPresented: $showTerms) { TermsOfServiceView() }
+        .sheet(isPresented: $showEULA) { EULAView() }
         .task {
             await storeManager.loadProducts()
         }
@@ -227,6 +235,7 @@ struct PaywallView: View {
     @State private var errorMessage: String?
     @State private var showPrivacy = false
     @State private var showTerms = false
+    @State private var showEULA = false
 
     private var storeManager: StoreManager { store.storeManager }
 
@@ -340,6 +349,12 @@ struct PaywallView: View {
                             .foregroundColor(GC.accent)
                             .underline()
                     }
+                    Button { showEULA = true } label: {
+                        Text("EULA")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(GC.accent)
+                            .underline()
+                    }
                 }
             }
             .padding(.horizontal, 24)
@@ -348,6 +363,7 @@ struct PaywallView: View {
         .background(GC.bg.ignoresSafeArea())
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
         .sheet(isPresented: $showTerms) { TermsOfServiceView() }
+        .sheet(isPresented: $showEULA) { EULAView() }
         .task {
             await storeManager.loadProducts()
         }
