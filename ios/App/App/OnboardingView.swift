@@ -6,7 +6,10 @@ struct OnboardingView: View {
     @EnvironmentObject var store: DataStore
     @State private var selectedPlan = "trial"
     @State private var isPurchasing = false
+    @State private var isRestoring = false
     @State private var errorMessage: String?
+    @State private var showPrivacy = false
+    @State private var showTerms = false
 
     private var storeManager: StoreManager { store.storeManager }
 
@@ -117,7 +120,23 @@ struct OnboardingView: View {
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                .disabled(isPurchasing)
+                .disabled(isPurchasing || isRestoring)
+
+                Button {
+                    handleRestore()
+                } label: {
+                    if isRestoring {
+                        HStack(spacing: 6) {
+                            ProgressView().tint(GC.textSecondary)
+                            Text("Restoring...")
+                        }
+                    } else {
+                        Text("Restore Purchases")
+                    }
+                }
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(GC.textSecondary)
+                .disabled(isPurchasing || isRestoring)
 
                 if selectedPlan != "trial" {
                     Text("Payment will be charged to your Apple ID. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period.")
@@ -129,13 +148,42 @@ struct OnboardingView: View {
                         .font(.system(size: 12))
                         .foregroundColor(GC.textTertiary)
                 }
+
+                HStack(spacing: 16) {
+                    Button { showTerms = true } label: {
+                        Text("Terms of Service")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(GC.accent)
+                            .underline()
+                    }
+                    Button { showPrivacy = true } label: {
+                        Text("Privacy Policy")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(GC.accent)
+                            .underline()
+                    }
+                }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
         }
         .background(GC.bg.ignoresSafeArea())
+        .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
+        .sheet(isPresented: $showTerms) { TermsOfServiceView() }
         .task {
             await storeManager.loadProducts()
+        }
+    }
+
+    private func handleRestore() {
+        errorMessage = nil
+        isRestoring = true
+        Task { @MainActor in
+            await store.restorePurchases()
+            isRestoring = false
+            if !store.isSubscribed {
+                errorMessage = "No active subscription found for this Apple ID."
+            }
         }
     }
 
@@ -177,6 +225,8 @@ struct PaywallView: View {
     @State private var isPurchasing = false
     @State private var isRestoring = false
     @State private var errorMessage: String?
+    @State private var showPrivacy = false
+    @State private var showTerms = false
 
     private var storeManager: StoreManager { store.storeManager }
 
@@ -276,11 +326,28 @@ struct PaywallView: View {
                     .font(.system(size: 10))
                     .foregroundColor(GC.textTertiary)
                     .multilineTextAlignment(.center)
+
+                HStack(spacing: 16) {
+                    Button { showTerms = true } label: {
+                        Text("Terms of Service")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(GC.accent)
+                            .underline()
+                    }
+                    Button { showPrivacy = true } label: {
+                        Text("Privacy Policy")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(GC.accent)
+                            .underline()
+                    }
+                }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
         }
         .background(GC.bg.ignoresSafeArea())
+        .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
+        .sheet(isPresented: $showTerms) { TermsOfServiceView() }
         .task {
             await storeManager.loadProducts()
         }
