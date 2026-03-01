@@ -148,7 +148,7 @@ struct OnboardingView: View {
         }
 
         isPurchasing = true
-        Task {
+        Task { @MainActor in
             // If products haven't loaded yet, try loading them now
             if !storeManager.productsLoaded {
                 await storeManager.reloadProducts()
@@ -290,7 +290,7 @@ struct PaywallView: View {
         errorMessage = nil
 
         isPurchasing = true
-        Task {
+        Task { @MainActor in
             // If products haven't loaded yet, try loading them now
             if !storeManager.productsLoaded {
                 await storeManager.reloadProducts()
@@ -314,7 +314,7 @@ struct PaywallView: View {
     private func handleRestore() {
         errorMessage = nil
         isRestoring = true
-        Task {
+        Task { @MainActor in
             await store.restorePurchases()
             isRestoring = false
             if !store.isSubscribed {

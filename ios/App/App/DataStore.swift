@@ -6,6 +6,7 @@ import UserNotifications
 
 // MARK: - DataStore (UserDefaults persistence)
 
+@MainActor
 class DataStore: ObservableObject {
     static let shared = DataStore()
 
@@ -41,7 +42,7 @@ class DataStore: ObservableObject {
         }.store(in: &cancellables)
 
         // Sync on launch
-        Task { @MainActor in
+        Task {
             await storeManager.updateSubscriptionStatus()
             syncSubscriptionFromStore()
         }

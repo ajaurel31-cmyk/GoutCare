@@ -10,6 +10,7 @@ enum StoreProduct: String, CaseIterable {
 }
 
 // MARK: - Store Manager (StoreKit 2)
+@MainActor
 class StoreManager: ObservableObject {
     static let shared = StoreManager()
 
@@ -97,8 +98,18 @@ class StoreManager: ObservableObject {
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
-                await updateSubscriptionStatus()
+
+                // Immediately grant access for the purchased product
+                purchasedProductIDs.insert(transaction.productID)
+                if let expDate = transaction.expirationDate {
+                    subscriptionExpirationDate = expDate
+                }
+
                 await transaction.finish()
+
+                // Update full status in background (non-blocking)
+                Task { await self.updateSubscriptionStatus() }
+
                 isLoading = false
                 return true
 
@@ -214,16 +225,13 @@ class StoreManager: ObservableObject {
     // MARK: - Transaction Listener
 
     /// Listen for StoreKit transaction updates (renewals, refunds, revocations)
-    private func listenForTransactions() -> Task<Void, Error> {
+    private nonisolated func listenForTransactions() -> Task<Void, Error> {
         Task.detached { [weak self] in
             for await result in Transaction.updates {
-                guard let self = self else { break }
-
                 if case .verified(let transaction) = result {
-                    await self.updateSubscriptionStatus()
+                    await self?.updateSubscriptionStatus()
                     await transaction.finish()
                 } else {
-                    // Verification failed — do not grant access
                     print("[StoreManager] Transaction verification failed")
                 }
             }
