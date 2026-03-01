@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:mobile": "CAPACITOR_BUILD=true NEXT_PUBLIC_API_URL=https://goutcare.vercel.app next build",
+    "build:mobile": "CAPACITOR_BUILD=true NEXT_PUBLIC_API_URL=https://www.goutcare.app next build",
     "start": "next start",
     "lint": "next lint"
   },
