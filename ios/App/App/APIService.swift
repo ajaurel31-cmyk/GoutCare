@@ -41,8 +41,15 @@ class APIService {
             throw APIError.serverError(statusCode: httpResponse.statusCode)
         }
 
-        let result = try JSONDecoder().decode(ScanResult.self, from: data)
-        return result
+        do {
+            let result = try JSONDecoder().decode(ScanResult.self, from: data)
+            return result
+        } catch {
+            let responseBody = String(data: data, encoding: .utf8) ?? "non-utf8"
+            print("[APIService] Decode failed: \(error)")
+            print("[APIService] Raw response: \(responseBody)")
+            throw APIError.serverErrorWithMessage("Failed to parse food analysis. Please try again.")
+        }
     }
 }
 

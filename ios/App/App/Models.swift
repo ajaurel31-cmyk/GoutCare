@@ -276,6 +276,60 @@ struct ScanResult: Codable {
     let safetyDuringFlare: String
     let riskFactors: [String]
     let benefits: [String]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // foods: accept array of strings, or single string
+        if let arr = try? container.decode([String].self, forKey: .foods) {
+            foods = arr
+        } else if let single = try? container.decode(String.self, forKey: .foods) {
+            foods = [single]
+        } else {
+            foods = []
+        }
+
+        // purineLevel: AI may return "very-high", "Very High", "very_high", "veryHigh", etc.
+        if let level = try? container.decode(PurineLevel.self, forKey: .purineLevel) {
+            purineLevel = level
+        } else if let raw = try? container.decode(String.self, forKey: .purineLevel) {
+            let normalized = raw.lowercased().trimmingCharacters(in: .whitespaces)
+            if normalized == "very-high" || normalized == "very high" || normalized == "very_high" || normalized == "veryhigh" {
+                purineLevel = .veryHigh
+            } else if normalized == "high" {
+                purineLevel = .high
+            } else if normalized == "moderate" || normalized == "medium" {
+                purineLevel = .moderate
+            } else {
+                purineLevel = .low
+            }
+        } else {
+            purineLevel = .low
+        }
+
+        // estimatedPurine: AI may return as Double (150.0) or String ("150")
+        if let intVal = try? container.decode(Int.self, forKey: .estimatedPurine) {
+            estimatedPurine = intVal
+        } else if let doubleVal = try? container.decode(Double.self, forKey: .estimatedPurine) {
+            estimatedPurine = Int(doubleVal)
+        } else if let strVal = try? container.decode(String.self, forKey: .estimatedPurine),
+                  let parsed = Int(strVal) ?? Int(Double(strVal) ?? 0) as Int? {
+            estimatedPurine = parsed
+        } else {
+            estimatedPurine = 0
+        }
+
+        explanation = (try? container.decode(String.self, forKey: .explanation)) ?? ""
+        alternatives = (try? container.decode([String].self, forKey: .alternatives)) ?? []
+        safetyDuringFlare = (try? container.decode(String.self, forKey: .safetyDuringFlare)) ?? ""
+        riskFactors = (try? container.decode([String].self, forKey: .riskFactors)) ?? []
+        benefits = (try? container.decode([String].self, forKey: .benefits)) ?? []
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case foods, purineLevel, estimatedPurine, explanation, alternatives
+        case safetyDuringFlare, riskFactors, benefits
+    }
 }
 
 // MARK: - Drug Interactions
