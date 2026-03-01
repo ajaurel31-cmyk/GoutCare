@@ -28,8 +28,17 @@ class APIService {
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw APIError.serverError
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.networkError
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            // Try to extract error message from the server response
+            if let errorBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let message = errorBody["error"] as? String {
+                throw APIError.serverErrorWithMessage(message)
+            }
+            throw APIError.serverError(statusCode: httpResponse.statusCode)
         }
 
         let result = try JSONDecoder().decode(ScanResult.self, from: data)
@@ -39,13 +48,15 @@ class APIService {
 
 enum APIError: LocalizedError {
     case invalidImage
-    case serverError
+    case serverError(statusCode: Int)
+    case serverErrorWithMessage(String)
     case networkError
 
     var errorDescription: String? {
         switch self {
         case .invalidImage: return "Could not process the image."
-        case .serverError: return "Server error. Please try again."
+        case .serverError(let code): return "Server error (\(code)). Please try again."
+        case .serverErrorWithMessage(let msg): return msg
         case .networkError: return "Network error. Check your connection."
         }
     }

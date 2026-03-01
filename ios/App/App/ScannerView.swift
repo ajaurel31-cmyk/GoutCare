@@ -60,7 +60,7 @@ struct ScannerView: View {
                         .padding(32)
                         .card()
                     } else if let result = result {
-                        ResultView(result: result, saved: $saved, onSave: saveResult)
+                        ResultView(result: result, saved: $saved, onSave: saveResult, onScanAgain: reset)
                     } else if let error = errorMessage {
                         VStack(spacing: 12) {
                             Image(systemName: "exclamationmark.triangle.fill")
@@ -70,8 +70,12 @@ struct ScannerView: View {
                                 .font(.system(size: 15))
                                 .foregroundColor(GC.textSecondary)
                                 .multilineTextAlignment(.center)
-                            Button("Try Again") { analyze() }
-                                .buttonStyle(SecondaryButtonStyle())
+                            HStack(spacing: 12) {
+                                Button("Retake") { reset() }
+                                    .buttonStyle(SecondaryButtonStyle())
+                                Button("Try Again") { analyze() }
+                                    .buttonStyle(PrimaryButtonStyle())
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(24)
@@ -194,6 +198,7 @@ struct ResultView: View {
     let result: ScanResult
     @Binding var saved: Bool
     let onSave: () -> Void
+    let onScanAgain: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -289,6 +294,9 @@ struct ResultView: View {
                 Button("Save to Food Log", action: onSave)
                     .buttonStyle(PrimaryButtonStyle())
             }
+
+            Button("Scan Again", action: onScanAgain)
+                .buttonStyle(SecondaryButtonStyle())
         }
         .card()
     }
