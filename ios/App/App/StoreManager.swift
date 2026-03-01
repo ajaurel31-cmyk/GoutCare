@@ -53,6 +53,7 @@ class StoreManager: ObservableObject {
                 if !storeProducts.isEmpty {
                     products = storeProducts.sorted { $0.price < $1.price }
                     print("[StoreManager] Loaded \(storeProducts.count) products")
+                    await updateTrialEligibility()
                     return
                 } else {
                     print("[StoreManager] Attempt \(attempt): No products returned for IDs: \(ids)")
@@ -227,6 +228,9 @@ class StoreManager: ObservableObject {
 
     /// Check if user is eligible for the introductory offer (free trial)
     func updateTrialEligibility() async {
+        // Don't clear trial eligibility if products haven't loaded yet —
+        // keep the default (true) until we can actually check.
+        guard productsLoaded else { return }
         guard let monthly = monthlyProduct,
               let subscription = monthly.subscription else {
             isEligibleForTrial = false
