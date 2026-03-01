@@ -260,14 +260,12 @@ struct SettingsView: View {
                     Button {
                         guard !isExporting else { return }
                         isExporting = true
-                        DispatchQueue.global(qos: .userInitiated).async {
+                        Task {
                             let pdfData = store.exportPDFReport()
                             let url = FileManager.default.temporaryDirectory.appendingPathComponent("GoutCare-Report-\(Date().dateKey).pdf")
                             try? pdfData.write(to: url)
-                            DispatchQueue.main.async {
-                                isExporting = false
-                                presentShareSheet(url: url)
-                            }
+                            isExporting = false
+                            presentShareSheet(url: url)
                         }
                     } label: {
                         HStack {
