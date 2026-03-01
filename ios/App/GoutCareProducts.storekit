@@ -1,0 +1,100 @@
+{
+  "identifier" : "8F71C3E4-A5B2-4D8C-9E7F-1A2B3C4D5E6F",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "1234567890",
+    "_developerTeamID" : "XXXXXXXXXX",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "setting" : "automatic-renewal-status"
+      },
+      {
+        "current" : null,
+        "setting" : "billing-grace-period"
+      },
+      {
+        "current" : null,
+        "setting" : "product-entitlement-revocation"
+      },
+      {
+        "current" : null,
+        "setting" : "subscription-status"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21537845",
+      "localizations" : [
+
+      ],
+      "name" : "GoutCare Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6B2A9F31-E4C7-4D8A-B5F1-9C3E7A2D1B04",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Full access billed monthly",
+              "displayName" : "GoutCare Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.goutcare.app.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Subscription",
+          "subscriptionGroupID" : "21537845",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "29.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "A4D8E2C6-7B1F-4A93-8E5D-2F6C9B3A7D15",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Full access billed annually - save 50%",
+              "displayName" : "GoutCare Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.goutcare.app.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual Subscription",
+          "subscriptionGroupID" : "21537845",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

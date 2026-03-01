@@ -33,10 +33,10 @@ export default function RootLayout({
       </head>
       <body>
         <AppShell>{children}</AppShell>
-        {/* Inline theme init to prevent flash */}
+        {/* Inline theme init + Capacitor native detection */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var p=JSON.parse(localStorage.getItem('goutcare_user_profile')||'{}');var t=p.theme||'dark';if(t==='system'){t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}})()`,
+            __html: `(function(){try{var p=JSON.parse(localStorage.getItem('goutcare_user_profile')||'{}');var t=p.theme||'dark';if(t==='system'){t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}if(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform()){document.body.classList.add('capacitor')}})()`,
           }}
         />
       </body>

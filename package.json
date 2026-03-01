@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:mobile": "CAPACITOR_BUILD=true NEXT_PUBLIC_API_URL=https://goutcare.vercel.app next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -16,6 +17,7 @@
     "@capacitor/haptics": "^8.0.0",
     "@capacitor/ios": "^8.1.0",
     "@capacitor/local-notifications": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.1",
     "@capgo/native-purchases": "^8.0.24",
     "next": "14.2.35",
     "react": "^18",
