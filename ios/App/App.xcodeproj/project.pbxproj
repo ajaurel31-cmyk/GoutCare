@@ -45,7 +45,7 @@
 		AA000000000000000000001F /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
 		AA0000000000000000000030 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		AA0000000000000000000031 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
-		AA0000000000000000000032 /* GoutCareProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstorekit; name = GoutCareProducts.storekit; path = GoutCareProducts.storekit; sourceTree = SOURCE_ROOT; };
+		AA0000000000000000000032 /* GoutCareProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = GoutCareProducts.storekit; path = GoutCareProducts.storekit; sourceTree = SOURCE_ROOT; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
