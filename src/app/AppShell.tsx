@@ -6,7 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import BottomNav from '@/components/BottomNav';
 
-const HIDE_NAV = ['/onboarding', '/paywall', '/terms', '/privacy'];
+const HIDE_NAV = ['/onboarding', '/paywall', '/terms', '/privacy', '/eula', '/support'];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

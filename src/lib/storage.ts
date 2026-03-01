@@ -72,7 +72,7 @@ const DEFAULT_PROFILE: UserProfile = {
   restrictions: [],
   purineTarget: DEFAULT_PURINE_TARGET,
   waterGoal: DEFAULT_WATER_GOAL,
-  theme: 'system',
+  theme: 'dark',
   onboardingComplete: false,
   trialStartDate: null,
   notificationsEnabled: false,

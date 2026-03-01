@@ -98,6 +98,9 @@ export default function ScannerPage() {
       });
 
       if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error('Analysis server not reachable. Please check your connection and try again.');
+        }
         const errData = await res.json().catch(() => null);
         throw new Error(errData?.error || `Analysis failed (${res.status})`);
       }

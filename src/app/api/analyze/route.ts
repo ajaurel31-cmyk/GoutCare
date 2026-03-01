@@ -1,21 +1,38 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
 
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        { error: 'API key not configured. Set ANTHROPIC_API_KEY in environment.' },
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
+    const client = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+
     const { images } = await request.json();
-    
+
     if (!images || !Array.isArray(images) || images.length === 0) {
-      return NextResponse.json({ error: 'No images provided' }, { status: 400 });
+      return NextResponse.json({ error: 'No images provided' }, { status: 400, headers: corsHeaders });
     }
 
     // Build content array with images
     const content: any[] = [];
-    
+
     for (const image of images) {
       // image is base64 string, detect media type
       let mediaType = 'image/jpeg';
@@ -84,7 +101,7 @@ Return ONLY valid JSON with the exact structure above. No markdown code fences.`
 
     const textBlock = response.content.find((block: any) => block.type === 'text');
     if (!textBlock || textBlock.type !== 'text') {
-      return NextResponse.json({ error: 'No response from AI' }, { status: 500 });
+      return NextResponse.json({ error: 'No response from AI' }, { status: 500, headers: corsHeaders });
     }
 
     // Parse the JSON response
@@ -97,16 +114,16 @@ Return ONLY valid JSON with the exact structure above. No markdown code fences.`
       if (jsonMatch) {
         result = JSON.parse(jsonMatch[0]);
       } else {
-        return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500, headers: corsHeaders });
       }
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, { headers: corsHeaders });
   } catch (error: any) {
     console.error('Analyze error:', error);
     return NextResponse.json(
       { error: error.message || 'Analysis failed' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
