@@ -676,6 +676,7 @@ export default function SettingsPage() {
           <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
             <Link href="/terms" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Terms of Service</Link>
             <Link href="/privacy" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Privacy Policy</Link>
+            <Link href="/eula" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>EULA</Link>
           </div>
         </div>
       </div>

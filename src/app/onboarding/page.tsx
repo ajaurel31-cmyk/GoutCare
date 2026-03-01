@@ -140,6 +140,8 @@ export default function OnboardingPage() {
           <span style={styles.legalSep}>|</span>
           <Link href="/privacy" style={styles.legalLink}>Privacy Policy</Link>
           <span style={styles.legalSep}>|</span>
+          <Link href="/eula" style={styles.legalLink}>EULA</Link>
+          <span style={styles.legalSep}>|</span>
           <button onClick={handleRestore} disabled={loading} style={{ ...styles.legalLink, background: 'none', border: 'none', padding: 0 }}>
             Restore Purchases
           </button>
