@@ -74,7 +74,6 @@ const DEFAULT_PROFILE: UserProfile = {
   waterGoal: DEFAULT_WATER_GOAL,
   theme: 'dark',
   onboardingComplete: false,
-  trialStartDate: null,
   notificationsEnabled: false,
 };
 

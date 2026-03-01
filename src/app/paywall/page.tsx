@@ -1,40 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckIcon, CrownIcon } from '@/components/icons';
-import { purchaseProduct, startTrial, restorePurchases } from '@/lib/subscription';
-import { getUserProfile } from '@/lib/storage';
+import { purchaseProduct, restorePurchases } from '@/lib/subscription';
 import { PRODUCT_IDS } from '@/lib/constants';
 
-type Plan = 'trial' | 'monthly' | 'annual';
+type Plan = 'monthly' | 'annual';
 
 export default function PaywallPage() {
   const router = useRouter();
-  const [selected, setSelected] = useState<Plan>('annual');
+  const [selected, setSelected] = useState<Plan>('monthly');
   const [loading, setLoading] = useState(false);
-  const [canTrial, setCanTrial] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const profile = getUserProfile();
-    // Allow trial if user has never started one
-    if (!profile.trialStartDate) {
-      setCanTrial(true);
-      setSelected('trial');
-    }
-  }, []);
 
   const handleSubscribe = async () => {
     setLoading(true);
     setError(null);
     try {
-      if (selected === 'trial') {
-        startTrial();
-        router.replace('/');
-        return;
-      }
       const productId = selected === 'monthly' ? PRODUCT_IDS.monthly : PRODUCT_IDS.annual;
       const success = await purchaseProduct(productId);
       if (success) {
@@ -65,8 +49,7 @@ export default function PaywallPage() {
   };
 
   const disclosureText = () => {
-    if (selected === 'trial') return 'No charge during trial. After 7 days, subscribe at $4.99/month or $29.99/year to continue.';
-    if (selected === 'monthly') return 'Subscription auto-renews at $4.99/month until cancelled.';
+    if (selected === 'monthly') return '7-day free trial, then $4.99/month. Auto-renews until cancelled.';
     return 'Subscription auto-renews at $29.99/year until cancelled.';
   };
 
@@ -81,9 +64,9 @@ export default function PaywallPage() {
           </svg>
         </div>
 
-        <h1 style={styles.heading}>Your Free Trial Has Ended</h1>
+        <h1 style={styles.heading}>Unlock GoutCare</h1>
         <p style={styles.sub}>
-          Subscribe to continue tracking your gout, scanning foods with AI, and managing your health.
+          Subscribe to track your gout, scan foods with AI, and manage your health.
         </p>
 
         {/* Features list */}
@@ -100,32 +83,18 @@ export default function PaywallPage() {
 
         {/* Plan Cards */}
         <div style={styles.plans}>
-          {/* Trial — only if never used */}
-          {canTrial && (
-            <button
-              onClick={() => setSelected('trial')}
-              style={{ ...styles.planCard, ...(selected === 'trial' ? styles.planSelected : {}) }}
-            >
-              <div style={styles.planTop}>
-                <span style={styles.planName}>7-Day Free Trial</span>
-                {selected === 'trial' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
-              </div>
-              <span style={styles.planPrice}>$0.00</span>
-              <span style={styles.planDetail}>Full access for 7 days, then choose a plan</span>
-            </button>
-          )}
-
-          {/* Monthly */}
+          {/* Monthly with free trial */}
           <button
             onClick={() => setSelected('monthly')}
             style={{ ...styles.planCard, ...(selected === 'monthly' ? styles.planSelected : {}) }}
           >
+            <div style={styles.saveBadge}>Free Trial</div>
             <div style={styles.planTop}>
               <span style={styles.planName}>Monthly</span>
               {selected === 'monthly' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
             </div>
             <span style={styles.planPrice}>$4.99<span style={styles.planPeriod}>/month</span></span>
-            <span style={styles.planDetail}>Billed monthly, cancel anytime</span>
+            <span style={styles.planDetail}>7-day free trial, then billed monthly</span>
           </button>
 
           {/* Annual */}
@@ -151,7 +120,7 @@ export default function PaywallPage() {
         {/* CTA */}
         <button onClick={handleSubscribe} disabled={loading} style={{ ...styles.cta, opacity: loading ? 0.6 : 1 }}>
           <CrownIcon size={20} color="#1e3a5f" />
-          <span>{loading ? 'Processing...' : selected === 'trial' ? 'Start Free Trial' : 'Subscribe Now'}</span>
+          <span>{loading ? 'Processing...' : selected === 'monthly' ? 'Start Free Trial' : 'Subscribe Now'}</span>
         </button>
 
         <p style={styles.cancel}>{disclosureText()}</p>

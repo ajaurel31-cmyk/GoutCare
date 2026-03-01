@@ -4,7 +4,7 @@ import StoreKit
 // MARK: - Onboarding
 struct OnboardingView: View {
     @EnvironmentObject var store: DataStore
-    @State private var selectedPlan = "trial"
+    @State private var selectedPlan = "monthly"
     @State private var isPurchasing = false
     @State private var isRestoring = false
     @State private var errorMessage: String?
@@ -13,6 +13,7 @@ struct OnboardingView: View {
     @State private var showEULA = false
 
     private var storeManager: StoreManager { store.storeManager }
+    private var trialEligible: Bool { storeManager.isEligibleForTrial }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -53,29 +54,21 @@ struct OnboardingView: View {
 
                     // Plan selection
                     VStack(spacing: 12) {
-                        PlanCard(
-                            title: "7-Day Free Trial",
-                            price: "$0.00",
-                            desc: "Full access for 7 days",
-                            isSelected: selectedPlan == "trial",
-                            badge: nil
-                        ) { selectedPlan = "trial" }
-
                         if let monthly = storeManager.monthlyProduct {
                             PlanCard(
                                 title: "Monthly",
                                 price: storeManager.priceWithPeriod(for: monthly),
-                                desc: "Billed monthly, auto-renews",
+                                desc: trialEligible ? "7-day free trial, then billed monthly" : "Billed monthly, auto-renews",
                                 isSelected: selectedPlan == "monthly",
-                                badge: nil
+                                badge: trialEligible ? "Free Trial" : nil
                             ) { selectedPlan = "monthly" }
                         } else {
                             PlanCard(
                                 title: "Monthly",
                                 price: "$4.99/mo",
-                                desc: "Billed monthly, auto-renews",
+                                desc: trialEligible ? "7-day free trial, then billed monthly" : "Billed monthly, auto-renews",
                                 isSelected: selectedPlan == "monthly",
-                                badge: nil
+                                badge: trialEligible ? "Free Trial" : nil
                             ) { selectedPlan = "monthly" }
                         }
 
@@ -117,7 +110,7 @@ struct OnboardingView: View {
                         ProgressView()
                             .tint(.white)
                     } else {
-                        Text(selectedPlan == "trial" ? "Start Free Trial" : "Subscribe Now")
+                        Text(trialEligible && selectedPlan == "monthly" ? "Start Free Trial" : "Subscribe Now")
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
@@ -139,15 +132,16 @@ struct OnboardingView: View {
                 .foregroundColor(GC.textSecondary)
                 .disabled(isPurchasing || isRestoring)
 
-                if selectedPlan != "trial" {
-                    Text("Payment will be charged to your Apple ID. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period.")
+                if trialEligible && selectedPlan == "monthly" {
+                    Text("7-day free trial. Then auto-renews at \(storeManager.monthlyProduct.map { storeManager.priceWithPeriod(for: $0) } ?? "$4.99/mo"). Cancel anytime.")
                         .font(.system(size: 10))
                         .foregroundColor(GC.textTertiary)
                         .multilineTextAlignment(.center)
                 } else {
-                    Text("No payment required. Cancel anytime.")
-                        .font(.system(size: 12))
+                    Text("Payment will be charged to your Apple ID. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period.")
+                        .font(.system(size: 10))
                         .foregroundColor(GC.textTertiary)
+                        .multilineTextAlignment(.center)
                 }
 
                 HStack(spacing: 16) {
@@ -197,12 +191,6 @@ struct OnboardingView: View {
 
     private func handlePurchase() {
         errorMessage = nil
-
-        if selectedPlan == "trial" {
-            store.startTrial()
-            return
-        }
-
         isPurchasing = true
         Task { @MainActor in
             // If products haven't loaded yet, try loading them now
@@ -238,6 +226,7 @@ struct PaywallView: View {
     @State private var showEULA = false
 
     private var storeManager: StoreManager { store.storeManager }
+    private var trialEligible: Bool { storeManager.isEligibleForTrial }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -250,10 +239,10 @@ struct PaywallView: View {
                         .foregroundColor(GC.accent)
 
                     VStack(spacing: 8) {
-                        Text("Your Free Trial Has Ended")
+                        Text("Unlock GoutCare")
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(GC.text)
-                        Text("Subscribe to continue using GoutCare")
+                        Text("Subscribe to access all features")
                             .font(.system(size: 15))
                             .foregroundColor(GC.textSecondary)
                     }
@@ -271,12 +260,12 @@ struct PaywallView: View {
                             PlanCard(
                                 title: "Monthly",
                                 price: storeManager.priceWithPeriod(for: monthly),
-                                desc: "Billed monthly, auto-renews",
+                                desc: trialEligible ? "7-day free trial, then billed monthly" : "Billed monthly, auto-renews",
                                 isSelected: selectedPlan == "monthly",
-                                badge: nil
+                                badge: trialEligible ? "Free Trial" : nil
                             ) { selectedPlan = "monthly" }
                         } else {
-                            PlanCard(title: "Monthly", price: "$4.99/mo", desc: "Billed monthly, auto-renews", isSelected: selectedPlan == "monthly", badge: nil) { selectedPlan = "monthly" }
+                            PlanCard(title: "Monthly", price: "$4.99/mo", desc: trialEligible ? "7-day free trial, then billed monthly" : "Billed monthly, auto-renews", isSelected: selectedPlan == "monthly", badge: trialEligible ? "Free Trial" : nil) { selectedPlan = "monthly" }
                         }
 
                         if let annual = storeManager.annualProduct {
@@ -309,7 +298,7 @@ struct PaywallView: View {
                     if isPurchasing {
                         ProgressView().tint(.white)
                     } else {
-                        Text("Subscribe Now")
+                        Text(trialEligible && selectedPlan == "monthly" ? "Start Free Trial" : "Subscribe Now")
                     }
                 }
                 .buttonStyle(PrimaryButtonStyle())
@@ -331,10 +320,17 @@ struct PaywallView: View {
                 .foregroundColor(GC.textSecondary)
                 .disabled(isPurchasing || isRestoring)
 
-                Text("Payment will be charged to your Apple ID. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period.")
-                    .font(.system(size: 10))
-                    .foregroundColor(GC.textTertiary)
-                    .multilineTextAlignment(.center)
+                if trialEligible && selectedPlan == "monthly" {
+                    Text("7-day free trial. Then auto-renews at \(storeManager.monthlyProduct.map { storeManager.priceWithPeriod(for: $0) } ?? "$4.99/mo"). Cancel anytime.")
+                        .font(.system(size: 10))
+                        .foregroundColor(GC.textTertiary)
+                        .multilineTextAlignment(.center)
+                } else {
+                    Text("Payment will be charged to your Apple ID. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period.")
+                        .font(.system(size: 10))
+                        .foregroundColor(GC.textTertiary)
+                        .multilineTextAlignment(.center)
+                }
 
                 HStack(spacing: 16) {
                     Button { showTerms = true } label: {
@@ -371,10 +367,8 @@ struct PaywallView: View {
 
     private func handlePurchase() {
         errorMessage = nil
-
         isPurchasing = true
         Task { @MainActor in
-            // If products haven't loaded yet, try loading them now
             if !storeManager.productsLoaded {
                 await storeManager.reloadProducts()
             }

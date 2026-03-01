@@ -239,7 +239,6 @@ struct UserProfile: Codable {
     var waterGoal: Int
     var theme: String
     var onboardingComplete: Bool
-    var trialStartDate: String?
     var notificationsEnabled: Bool
 
     init() {
@@ -248,7 +247,6 @@ struct UserProfile: Codable {
         self.waterGoal = 64
         self.theme = "dark"
         self.onboardingComplete = false
-        self.trialStartDate = nil
         self.notificationsEnabled = false
     }
 }
@@ -437,7 +435,6 @@ struct Constants {
     static let defaultPurineTarget = 400
     static let defaultWaterGoal = 64
     static let uricAcidTarget = 6.0
-    static let trialDays = 7
 }
 
 // MARK: - Helpers

@@ -7,7 +7,6 @@ export const FREE_SCAN_LIMIT = 3;
 export const DEFAULT_PURINE_TARGET = 400; // mg per day
 export const DEFAULT_WATER_GOAL = 64; // oz per day
 export const URIC_ACID_TARGET = 6.0; // mg/dL
-export const TRIAL_DAYS = 7;
 
 export const PURINE_THRESHOLDS = {
   low: 100,

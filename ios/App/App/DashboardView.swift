@@ -36,7 +36,7 @@ struct DashboardView: View {
                             .foregroundColor(GC.textSecondary)
                     }
                     Spacer()
-                    if store.isSubscribed && store.subscription.isTrial {
+                    if store.isTrialActive {
                         Text("\(store.trialDaysRemaining)d left")
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(GC.accent)

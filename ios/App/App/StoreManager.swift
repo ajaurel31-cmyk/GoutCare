@@ -20,6 +20,8 @@ class StoreManager: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var subscriptionExpirationDate: Date?
     @Published private(set) var subscriptionRenewalState: Product.SubscriptionInfo.RenewalState?
+    @Published private(set) var isInTrialPeriod = false
+    @Published private(set) var isEligibleForTrial = true
 
     private var transactionListener: Task<Void, Error>?
 
@@ -179,6 +181,7 @@ class StoreManager: ObservableObject {
         var activeIDs: Set<String> = []
         var latestExpiration: Date?
         var latestRenewalState: Product.SubscriptionInfo.RenewalState?
+        var trialDetected = false
 
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }
@@ -190,6 +193,11 @@ class StoreManager: ObservableObject {
                     if latestExpiration == nil || expDate > latestExpiration! {
                         latestExpiration = expDate
                     }
+                }
+
+                // Check if the current entitlement is from an introductory offer (free trial)
+                if transaction.offerType == .introductory {
+                    trialDetected = true
                 }
             }
         }
@@ -211,6 +219,20 @@ class StoreManager: ObservableObject {
         purchasedProductIDs = activeIDs
         subscriptionExpirationDate = latestExpiration
         subscriptionRenewalState = latestRenewalState
+        isInTrialPeriod = trialDetected
+
+        // Check introductory offer eligibility
+        await updateTrialEligibility()
+    }
+
+    /// Check if user is eligible for the introductory offer (free trial)
+    func updateTrialEligibility() async {
+        guard let monthly = monthlyProduct,
+              let subscription = monthly.subscription else {
+            isEligibleForTrial = false
+            return
+        }
+        isEligibleForTrial = await subscription.isEligibleForIntroOffer
     }
 
     // MARK: - Manage Subscription
@@ -306,6 +328,7 @@ class StoreManager: ObservableObject {
         if isInBillingRetry { return "Payment Issue" }
         if isRevoked { return "Revoked" }
         if isExpired { return "Expired" }
+        if isInTrialPeriod { return "Trial" }
         if hasActiveSubscription { return "Active" }
         return "None"
     }

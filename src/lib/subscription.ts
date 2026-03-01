@@ -1,13 +1,10 @@
 import { SubscriptionStatus } from './types';
-import { PRODUCT_IDS, TRIAL_DAYS } from './constants';
+import { PRODUCT_IDS } from './constants';
 import { isNative } from './platform';
 import {
   getSubscriptionStatus,
   setSubscriptionStatus,
-  getUserProfile,
-  updateUserProfile,
 } from './storage';
-import { getDaysSince, getToday } from './utils';
 
 // ─── Initialize Purchases ───────────────────────────────────────────────────
 
@@ -145,6 +142,7 @@ export async function restorePurchases(): Promise<boolean> {
 
 /**
  * Check the current subscription status.
+ * Trials are now managed by the App Store via introductory offers.
  * Uses localStorage cache and native SDK status when available.
  */
 export async function checkSubscriptionStatus(): Promise<SubscriptionStatus> {
@@ -169,22 +167,22 @@ export async function checkSubscriptionStatus(): Promise<SubscriptionStatus> {
         setSubscriptionStatus(status);
         return status;
       }
+
+      // No active subscription found via native SDK
+      const inactive: SubscriptionStatus = {
+        isActive: false,
+        plan: 'free',
+        expiresAt: null,
+        isTrial: false,
+      };
+      setSubscriptionStatus(inactive);
+      return inactive;
     } catch (error) {
       console.error('Failed to check subscription status:', error);
     }
   }
 
-  if (isTrialActive()) {
-    const trialStatus: SubscriptionStatus = {
-      isActive: true,
-      plan: 'trial',
-      expiresAt: null,
-      isTrial: true,
-    };
-    setSubscriptionStatus(trialStatus);
-    return trialStatus;
-  }
-
+  // Check if cached subscription has expired
   if (cached.isActive && cached.expiresAt) {
     const expiryDate = new Date(cached.expiresAt);
     if (expiryDate < new Date()) {
@@ -202,21 +200,15 @@ export async function checkSubscriptionStatus(): Promise<SubscriptionStatus> {
   return cached;
 }
 
-// ─── Trial Management ───────────────────────────────────────────────────────
+// ─── Subscription Helpers ───────────────────────────────────────────────────
 
-export function isTrialActive(): boolean {
-  const profile = getUserProfile();
-  if (!profile.trialStartDate) return false;
-  const daysSinceTrialStart = getDaysSince(profile.trialStartDate);
-  return daysSinceTrialStart < TRIAL_DAYS && daysSinceTrialStart >= 0;
-}
-
+/**
+ * Check if user has an active subscription (including App Store trial).
+ * Trial is now an App Store introductory offer, not managed locally.
+ */
 export function isSubscribed(): boolean {
-  if (isTrialActive()) return true;
   const status = getSubscriptionStatus();
   if (!status.isActive) return false;
-  // Expired trial should not grant access
-  if (status.plan === 'trial') return false;
   if (status.expiresAt) {
     const expiryDate = new Date(status.expiresAt);
     if (expiryDate < new Date()) return false;
@@ -224,23 +216,22 @@ export function isSubscribed(): boolean {
   return true;
 }
 
-export function startTrial(): void {
-  // Guard: only allow one trial per user
-  const profile = getUserProfile();
-  if (profile.trialStartDate) return;
-  updateUserProfile({ trialStartDate: getToday() });
-  setSubscriptionStatus({
-    isActive: true,
-    plan: 'trial',
-    expiresAt: null,
-    isTrial: true,
-  });
+/**
+ * Check if the current subscription is in its trial period (App Store introductory offer).
+ */
+export function isTrialActive(): boolean {
+  const status = getSubscriptionStatus();
+  return status.isActive && status.isTrial;
 }
 
+/**
+ * Get days remaining on the current subscription/trial.
+ */
 export function getTrialDaysRemaining(): number {
-  const profile = getUserProfile();
-  if (!profile.trialStartDate) return 0;
-  const daysSinceTrialStart = getDaysSince(profile.trialStartDate);
-  const remaining = TRIAL_DAYS - daysSinceTrialStart;
-  return Math.max(0, remaining);
+  const status = getSubscriptionStatus();
+  if (!status.isActive || !status.isTrial || !status.expiresAt) return 0;
+  const expiryDate = new Date(status.expiresAt);
+  const now = new Date();
+  const diffMs = expiryDate.getTime() - now.getTime();
+  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 }

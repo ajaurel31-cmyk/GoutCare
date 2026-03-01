@@ -48,7 +48,11 @@
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "6B2A9F31-E4C7-4D8A-B5F1-9C3E7A2D1B04",
-          "introductoryOffer" : null,
+          "introductoryOffer" : {
+            "internalID" : "D7E3F1A2-B5C4-4D9E-8A6F-3C2B1D0E9F87",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W"
+          },
           "localizations" : [
             {
               "description" : "Full access billed monthly",

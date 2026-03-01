@@ -63,72 +63,47 @@ class DataStore: ObservableObject {
 
     // MARK: - Subscription
 
-    /// User is subscribed if they have an active StoreKit subscription OR a valid local trial
+    /// User is subscribed if they have an active StoreKit subscription (includes trial via introductory offer)
     var isSubscribed: Bool {
-        storeManager.hasActiveSubscription || isTrialActive
-    }
-
-    /// Whether the local free trial is still active
-    var isTrialActive: Bool {
-        guard subscription.isTrial, let expStr = subscription.expiresAt else { return false }
-        let fmt = ISO8601DateFormatter()
-        if let exp = fmt.date(from: expStr) { return Date() < exp }
-        return false
-    }
-
-    /// Days remaining on local trial
-    var trialDaysRemaining: Int {
-        guard subscription.isTrial, let expStr = subscription.expiresAt else { return 0 }
-        let fmt = ISO8601DateFormatter()
-        guard let exp = fmt.date(from: expStr) else { return 0 }
-        return max(0, Calendar.current.dateComponents([.day], from: Date(), to: exp).day ?? 0)
-    }
-
-    /// Whether user has a paid StoreKit subscription (not just trial)
-    var hasPaidSubscription: Bool {
         storeManager.hasActiveSubscription
+    }
+
+    /// Whether the user is currently in a StoreKit free trial (introductory offer)
+    var isTrialActive: Bool {
+        storeManager.isInTrialPeriod
+    }
+
+    /// Days remaining on StoreKit trial
+    var trialDaysRemaining: Int {
+        guard isTrialActive else { return 0 }
+        return storeManager.daysUntilExpiration ?? 0
+    }
+
+    /// Whether user has a paid StoreKit subscription (not in trial)
+    var hasPaidSubscription: Bool {
+        storeManager.hasActiveSubscription && !storeManager.isInTrialPeriod
+    }
+
+    /// Whether user is eligible for the introductory offer (free trial)
+    var isEligibleForTrial: Bool {
+        storeManager.isEligibleForTrial
     }
 
     /// Display name for current plan
     var currentPlanName: String {
         if storeManager.hasActiveSubscription {
+            if storeManager.isInTrialPeriod { return "Free Trial" }
             return storeManager.activePlanName
         }
-        if isTrialActive { return "Free Trial" }
         return "None"
     }
 
     /// Expiration date for display
     var subscriptionExpirationDate: String? {
-        if storeManager.hasActiveSubscription {
-            return storeManager.formattedExpirationDate
-        }
-        if isTrialActive, let expStr = subscription.expiresAt {
-            let fmt = ISO8601DateFormatter()
-            if let exp = fmt.date(from: expStr) {
-                let df = DateFormatter()
-                df.dateStyle = .medium
-                return df.string(from: exp)
-            }
-        }
-        return nil
+        storeManager.formattedExpirationDate
     }
 
-    /// Start a local 7-day free trial (no payment required)
-    func startTrial() {
-        let exp = Calendar.current.date(byAdding: .day, value: Constants.trialDays, to: Date())!
-        let expString = ISO8601DateFormatter().string(from: exp)
-        subscription = SubscriptionStatus(
-            isActive: false,
-            plan: "trial",
-            expiresAt: expString,
-            isTrial: true
-        )
-        save(subscription, key: "gc_subscription")
-        updateProfile { $0.onboardingComplete = true }
-    }
-
-    /// Purchase a StoreKit subscription
+    /// Purchase a StoreKit subscription (trial is handled automatically via introductory offer)
     func purchaseSubscription(_ product: Product) async -> Bool {
         let success = await storeManager.purchase(product)
         if success {
@@ -152,7 +127,7 @@ class DataStore: ObservableObject {
     /// Sync local subscription status from StoreKit state
     private func syncSubscriptionFromStore() {
         if storeManager.hasActiveSubscription {
-            let plan = storeManager.activePlanName.lowercased()
+            let plan = storeManager.isInTrialPeriod ? "trial" : storeManager.activePlanName.lowercased()
             let expStr = storeManager.subscriptionExpirationDate.map {
                 ISO8601DateFormatter().string(from: $0)
             }
@@ -160,8 +135,11 @@ class DataStore: ObservableObject {
                 isActive: true,
                 plan: plan,
                 expiresAt: expStr,
-                isTrial: false
+                isTrial: storeManager.isInTrialPeriod
             )
+            save(subscription, key: "gc_subscription")
+        } else {
+            subscription = SubscriptionStatus()
             save(subscription, key: "gc_subscription")
         }
         objectWillChange.send()

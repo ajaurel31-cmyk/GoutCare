@@ -89,7 +89,6 @@ export interface UserProfile {
   waterGoal: number;
   theme: 'light' | 'dark' | 'system';
   onboardingComplete: boolean;
-  trialStartDate: string | null;
   notificationsEnabled: boolean;
 }
 

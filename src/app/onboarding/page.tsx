@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckIcon, CrownIcon } from '@/components/icons';
 import { updateUserProfile } from '@/lib/storage';
-import { startTrial, purchaseProduct, restorePurchases } from '@/lib/subscription';
+import { purchaseProduct, restorePurchases } from '@/lib/subscription';
 import { PRODUCT_IDS } from '@/lib/constants';
 
-type Plan = 'trial' | 'monthly' | 'annual';
+type Plan = 'monthly' | 'annual';
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [selected, setSelected] = useState<Plan>('trial');
+  const [selected, setSelected] = useState<Plan>('monthly');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,22 +20,16 @@ export default function OnboardingPage() {
     setLoading(true);
     setError(null);
     try {
-      if (selected === 'trial') {
-        startTrial();
+      const productId = selected === 'monthly' ? PRODUCT_IDS.monthly : PRODUCT_IDS.annual;
+      const success = await purchaseProduct(productId);
+      if (success) {
         updateUserProfile({ onboardingComplete: true });
         router.replace('/');
       } else {
-        const productId = selected === 'monthly' ? PRODUCT_IDS.monthly : PRODUCT_IDS.annual;
-        const success = await purchaseProduct(productId);
-        if (success) {
-          updateUserProfile({ onboardingComplete: true });
-          router.replace('/');
-        } else {
-          setError('Purchase was not completed. Please try again or start with the free trial.');
-        }
+        setError('Purchase was not completed. Please try again.');
       }
     } catch {
-      setError('Something went wrong. Please try again or start with the free trial.');
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -60,8 +54,7 @@ export default function OnboardingPage() {
   };
 
   const disclosureText = () => {
-    if (selected === 'trial') return 'No charge during trial. After 7 days, subscribe at $4.99/month or $29.99/year to continue.';
-    if (selected === 'monthly') return 'Subscription auto-renews at $4.99/month until cancelled.';
+    if (selected === 'monthly') return '7-day free trial, then $4.99/month. Auto-renews until cancelled.';
     return 'Subscription auto-renews at $29.99/year until cancelled.';
   };
 
@@ -81,30 +74,18 @@ export default function OnboardingPage() {
 
         {/* Plan Cards */}
         <div style={styles.plans}>
-          {/* 7-day trial */}
-          <button
-            onClick={() => setSelected('trial')}
-            style={{ ...styles.planCard, ...(selected === 'trial' ? styles.planSelected : {}) }}
-          >
-            <div style={styles.planTop}>
-              <span style={styles.planName}>7-Day Free Trial</span>
-              {selected === 'trial' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
-            </div>
-            <span style={styles.planPrice}>$0.00</span>
-            <span style={styles.planDetail}>Full access for 7 days, then choose a plan</span>
-          </button>
-
-          {/* Monthly */}
+          {/* Monthly with free trial */}
           <button
             onClick={() => setSelected('monthly')}
             style={{ ...styles.planCard, ...(selected === 'monthly' ? styles.planSelected : {}) }}
           >
+            <div style={styles.saveBadge}>Free Trial</div>
             <div style={styles.planTop}>
               <span style={styles.planName}>Monthly</span>
               {selected === 'monthly' && <div style={styles.check}><CheckIcon size={14} color="#fff" /></div>}
             </div>
             <span style={styles.planPrice}>$4.99<span style={styles.planPeriod}>/month</span></span>
-            <span style={styles.planDetail}>Billed monthly</span>
+            <span style={styles.planDetail}>7-day free trial, then billed monthly</span>
           </button>
 
           {/* Annual */}
@@ -130,7 +111,7 @@ export default function OnboardingPage() {
         {/* CTA */}
         <button onClick={handleContinue} disabled={loading} style={{ ...styles.cta, opacity: loading ? 0.6 : 1 }}>
           <CrownIcon size={20} color="#1e3a5f" />
-          <span>{loading ? 'Loading...' : selected === 'trial' ? 'Start Free Trial' : 'Subscribe Now'}</span>
+          <span>{loading ? 'Loading...' : selected === 'monthly' ? 'Start Free Trial' : 'Subscribe Now'}</span>
         </button>
 
         <p style={styles.cancel}>{disclosureText()}</p>
