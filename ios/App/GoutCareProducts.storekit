@@ -7,10 +7,7 @@
 
   ],
   "settings" : {
-    "_applicationInternalID" : "1234567890",
-    "_developerTeamID" : "XXXXXXXXXX",
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 0,
     "_locale" : "en_US",
     "_storefront" : "USA",
     "_storeKitErrors" : [
@@ -74,7 +71,7 @@
           ],
           "displayPrice" : "29.99",
           "familyShareable" : false,
-          "groupNumber" : 1,
+          "groupNumber" : 2,
           "internalID" : "A4D8E2C6-7B1F-4A93-8E5D-2F6C9B3A7D15",
           "introductoryOffer" : null,
           "localizations" : [
@@ -94,7 +91,7 @@
     }
   ],
   "version" : {
-    "major" : 3,
+    "major" : 4,
     "minor" : 0
   }
 }
