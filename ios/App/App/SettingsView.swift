@@ -176,7 +176,7 @@ struct SettingsView: View {
                     SectionLabel(text: "Gout Stage")
                     ForEach(GoutStage.allCases, id: \.self) { stage in
                         Button {
-                            store.updateProfile { $0.goutStage = stage }
+                            store.updateGoutStage(stage)
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
@@ -186,6 +186,12 @@ struct SettingsView: View {
                                     Text(stage.desc)
                                         .font(.system(size: 12))
                                         .foregroundColor(GC.textTertiary)
+                                    if store.profile.goutStage != stage {
+                                        Text("\(stage.recommendedPurineTarget)mg purine, \(stage.recommendedWaterGoal)oz water")
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundColor(GC.accent)
+                                            .padding(.top, 1)
+                                    }
                                 }
                                 Spacer()
                                 if store.profile.goutStage == stage {

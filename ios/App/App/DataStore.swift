@@ -61,6 +61,13 @@ class DataStore: ObservableObject {
         save(profile, key: "gc_profile")
     }
 
+    func updateGoutStage(_ stage: GoutStage) {
+        profile.goutStage = stage
+        profile.purineTarget = stage.recommendedPurineTarget
+        profile.waterGoal = stage.recommendedWaterGoal
+        save(profile, key: "gc_profile")
+    }
+
     // MARK: - Subscription
 
     /// User is subscribed if they have an active StoreKit subscription (includes trial via introductory offer)

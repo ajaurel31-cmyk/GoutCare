@@ -8,6 +8,24 @@ export const DEFAULT_PURINE_TARGET = 400; // mg per day
 export const DEFAULT_WATER_GOAL = 64; // oz per day
 export const URIC_ACID_TARGET = 6.0; // mg/dL
 
+export const STAGE_DEFAULTS: Record<string, { purineTarget: number; waterGoal: number; tip: string }> = {
+  acute: {
+    purineTarget: 300,
+    waterGoal: 80,
+    tip: 'Stricter purine limit and higher hydration during active flares',
+  },
+  intercritical: {
+    purineTarget: 400,
+    waterGoal: 64,
+    tip: 'Standard targets for maintenance between flares',
+  },
+  chronic: {
+    purineTarget: 350,
+    waterGoal: 72,
+    tip: 'Tighter management to reduce frequent flares',
+  },
+};
+
 export const PURINE_THRESHOLDS = {
   low: 100,
   moderate: 200,

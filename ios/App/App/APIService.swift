@@ -9,7 +9,7 @@ class APIService {
     // Backend URL — set to your deployed Next.js API
     private let baseURL = "https://www.goutcare.app"
 
-    func analyzeFood(image: UIImage) async throws -> ScanResult {
+    func analyzeFood(image: UIImage, goutStage: GoutStage = .intercritical) async throws -> ScanResult {
         guard let imageData = image.jpegData(compressionQuality: 0.7) else {
             throw APIError.invalidImage
         }
@@ -23,7 +23,7 @@ class APIService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 60
 
-        let body: [String: Any] = ["images": [dataURL]]
+        let body: [String: Any] = ["images": [dataURL], "goutStage": goutStage.rawValue]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await URLSession.shared.data(for: request)

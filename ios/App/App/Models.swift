@@ -61,9 +61,33 @@ enum GoutStage: String, Codable, CaseIterable {
 
     var desc: String {
         switch self {
-        case .acute: return "Currently experiencing or recently had a flare"
-        case .intercritical: return "Between flares"
-        case .chronic: return "Long-term, frequent flares"
+        case .acute: return "Currently experiencing or recently had a flare — stricter limits recommended"
+        case .intercritical: return "Between flares, managing to prevent next one"
+        case .chronic: return "Long-term, frequent flares — tighter management recommended"
+        }
+    }
+
+    var recommendedPurineTarget: Int {
+        switch self {
+        case .acute: return 300
+        case .intercritical: return 400
+        case .chronic: return 350
+        }
+    }
+
+    var recommendedWaterGoal: Int {
+        switch self {
+        case .acute: return 80
+        case .intercritical: return 64
+        case .chronic: return 72
+        }
+    }
+
+    var tip: String {
+        switch self {
+        case .acute: return "Stricter purine limit and higher hydration during active flares"
+        case .intercritical: return "Standard targets for maintenance between flares"
+        case .chronic: return "Tighter management to reduce frequent flares"
         }
     }
 }

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    const { images } = await request.json();
+    const { images, goutStage } = await request.json();
 
     if (!images || !Array.isArray(images) || images.length === 0) {
       return NextResponse.json({ error: 'No images provided' }, { status: 400, headers: corsHeaders });
@@ -68,6 +68,12 @@ export async function POST(request: NextRequest) {
       text: 'Analyze this food image for someone managing gout. Provide your response as JSON.',
     });
 
+    const stageContext = goutStage === 'acute'
+      ? `\n\nIMPORTANT CONTEXT: This patient is in the ACUTE stage (currently experiencing or recently had a gout flare). Be extra strict in your assessment. Even moderate-purine foods should be flagged with caution. Recommend the most conservative, anti-inflammatory diet choices. Emphasize hydration and foods that help reduce inflammation. Their daily purine target is only 300mg.`
+      : goutStage === 'chronic'
+      ? `\n\nIMPORTANT CONTEXT: This patient has CHRONIC gout (long-term, frequent flares). Be stricter than average in your assessment. Moderate-purine foods should include a note about portion control. Emphasize consistent low-purine eating patterns and foods that may help lower uric acid levels long-term. Their daily purine target is 350mg.`
+      : `\n\nCONTEXT: This patient is in the INTERCRITICAL stage (between flares, managing prevention). Provide standard gout-aware guidance. Their daily purine target is 400mg.`;
+
     const systemPrompt = `You are a specialized nutrition analyst for gout patients. Analyze food images and provide detailed purine content information.
 
 For each food image, identify ALL foods visible and provide:
@@ -75,7 +81,7 @@ For each food image, identify ALL foods visible and provide:
 1. "foods": array of food names detected
 2. "purineLevel": overall classification - "low" (<100mg/100g), "moderate" (100-200mg), "high" (200-300mg), or "very-high" (>300mg)
 3. "estimatedPurine": estimated total purine content in mg for a typical serving
-4. "explanation": 2-3 sentences explaining why this food is good or bad for gout sufferers. Be specific about which ingredients contribute most to purine content.
+4. "explanation": 2-3 sentences explaining why this food is good or bad for gout sufferers. Be specific about which ingredients contribute most to purine content. Tailor your advice to the patient's current gout stage.
 5. "alternatives": array of 3-5 safer lower-purine alternatives if the food is moderate or high purine. Empty array if already low.
 6. "safetyDuringFlare": one sentence about whether this food is safe during an active gout flare
 7. "riskFactors": array of specific risk factors (e.g., "High in organ meat purines", "Contains shellfish", "Beer inhibits uric acid excretion")
@@ -83,7 +89,7 @@ For each food image, identify ALL foods visible and provide:
 
 HIGH-RISK foods to flag: organ meats (liver, kidney), shellfish (mussels, shrimp, lobster), red meat, beer, anchovies, sardines, herring, mackerel, high-fructose corn syrup, yeast extract, game meats.
 
-BENEFICIAL foods to highlight: cherries, low-fat dairy, most vegetables, whole grains, coffee, vitamin C rich foods, water.
+BENEFICIAL foods to highlight: cherries, low-fat dairy, most vegetables, whole grains, coffee, vitamin C rich foods, water.${stageContext}
 
 Return ONLY valid JSON with the exact structure above. No markdown code fences.`;
 

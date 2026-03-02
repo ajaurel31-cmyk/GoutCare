@@ -159,7 +159,7 @@ struct ScannerView: View {
 
         Task {
             do {
-                let res = try await APIService.shared.analyzeFood(image: image)
+                let res = try await APIService.shared.analyzeFood(image: image, goutStage: store.profile.goutStage)
                 await MainActor.run {
                     self.result = res
                     self.isAnalyzing = false

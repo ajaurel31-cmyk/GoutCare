@@ -9,7 +9,7 @@ import {
   AlertIcon,
   ForkKnifeIcon,
 } from '@/components/icons';
-import { addFoodEntry, getScanCount, incrementScanCount } from '@/lib/storage';
+import { addFoodEntry, getScanCount, incrementScanCount, getUserProfile } from '@/lib/storage';
 import { isSubscribed, isTrialActive } from '@/lib/subscription';
 import { FREE_SCAN_LIMIT } from '@/lib/constants';
 import { getToday } from '@/lib/utils';
@@ -91,10 +91,11 @@ export default function ScannerPage() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/analyze`
         : '/api/analyze';
+      const profile = getUserProfile();
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: [imageData] }),
+        body: JSON.stringify({ images: [imageData], goutStage: profile.goutStage }),
       });
 
       if (!res.ok) {

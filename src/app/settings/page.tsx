@@ -35,6 +35,7 @@ import {
   DEFAULT_WATER_GOAL,
   MEDICATION_PRESETS,
   DRUG_INTERACTIONS,
+  STAGE_DEFAULTS,
 } from '@/lib/constants';
 import type { UserProfile, GoutStage, Medication, ReminderSettings } from '@/lib/types';
 import Link from 'next/link';
@@ -42,9 +43,9 @@ import Link from 'next/link';
 type ModalType = 'medication' | null;
 
 const GOUT_STAGES: { value: GoutStage; label: string; desc: string }[] = [
-  { value: 'acute', label: 'Acute', desc: 'Currently experiencing or recently had a flare' },
+  { value: 'acute', label: 'Acute', desc: 'Currently experiencing or recently had a flare — stricter limits recommended' },
   { value: 'intercritical', label: 'Intercritical', desc: 'Between flares, managing to prevent next one' },
-  { value: 'chronic', label: 'Chronic', desc: 'Long-term gout with frequent flares' },
+  { value: 'chronic', label: 'Chronic', desc: 'Long-term gout with frequent flares — tighter management recommended' },
 ];
 
 export default function SettingsPage() {
@@ -249,7 +250,7 @@ export default function SettingsPage() {
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>200 mg</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Default: {DEFAULT_PURINE_TARGET}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Stage default: {STAGE_DEFAULTS[profile.goutStage]?.purineTarget ?? DEFAULT_PURINE_TARGET}</span>
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>600 mg</span>
             </div>
           </div>
@@ -278,7 +279,7 @@ export default function SettingsPage() {
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>32 oz</span>
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Default: {DEFAULT_WATER_GOAL}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Stage default: {STAGE_DEFAULTS[profile.goutStage]?.waterGoal ?? DEFAULT_WATER_GOAL}</span>
               <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>128 oz</span>
             </div>
           </div>
@@ -546,23 +547,40 @@ export default function SettingsPage() {
       <div className="section">
         <div className="section-label">Gout Stage</div>
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          {GOUT_STAGES.map((s, i) => (
-            <button
-              key={s.value}
-              onClick={() => { updateField('goutStage', s.value); showToast(`Stage: ${s.label}`); }}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                width: '100%', padding: '14px 16px', cursor: 'pointer',
-                borderBottom: i < GOUT_STAGES.length - 1 ? '1px solid var(--border)' : 'none',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 600, textAlign: 'left' }}>{s.label}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'left', marginTop: 2 }}>{s.desc}</div>
-              </div>
-              {profile.goutStage === s.value && <CheckIcon size={18} color="var(--accent)" />}
-            </button>
-          ))}
+          {GOUT_STAGES.map((s, i) => {
+            const defaults = STAGE_DEFAULTS[s.value];
+            return (
+              <button
+                key={s.value}
+                onClick={() => {
+                  const stageDefaults = STAGE_DEFAULTS[s.value];
+                  updateUserProfile({
+                    goutStage: s.value,
+                    purineTarget: stageDefaults.purineTarget,
+                    waterGoal: stageDefaults.waterGoal,
+                  });
+                  refresh();
+                  showToast(`${s.label} — ${stageDefaults.purineTarget}mg purine, ${stageDefaults.waterGoal}oz water`);
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  width: '100%', padding: '14px 16px', cursor: 'pointer',
+                  borderBottom: i < GOUT_STAGES.length - 1 ? '1px solid var(--border)' : 'none',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 600, textAlign: 'left' }}>{s.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'left', marginTop: 2 }}>{s.desc}</div>
+                  {profile.goutStage !== s.value && defaults && (
+                    <div style={{ fontSize: 11, color: 'var(--accent)', textAlign: 'left', marginTop: 3 }}>
+                      Recommended: {defaults.purineTarget}mg purine, {defaults.waterGoal}oz water
+                    </div>
+                  )}
+                </div>
+                {profile.goutStage === s.value && <CheckIcon size={18} color="var(--accent)" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 
