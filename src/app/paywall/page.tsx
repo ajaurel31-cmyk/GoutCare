@@ -64,19 +64,33 @@ export default function PaywallPage() {
           </svg>
         </div>
 
-        <h1 style={styles.heading}>Unlock GoutCare</h1>
+        <h1 style={styles.heading}>Unlock GoutCare Premium</h1>
         <p style={styles.sub}>
-          Subscribe to track your gout, scan foods with AI, and manage your health.
+          Subscription required for unlimited AI food scans and PDF health reports.
         </p>
 
-        {/* Features list */}
+        {/* Premium features */}
         <div style={styles.features}>
-          {['AI-powered food scanning', 'Unlimited purine tracking', 'Uric acid trends & insights', 'Flare logging & analysis'].map((feat) => (
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' as const, letterSpacing: 1, marginBottom: -4 }}>
+            Premium features (subscription required)
+          </div>
+          {['Unlimited AI food scanning', 'PDF health reports for your doctor'].map((feat) => (
             <div key={feat} style={styles.featureRow}>
               <div style={styles.featureCheck}>
                 <CheckIcon size={12} color="#fff" />
               </div>
               <span style={styles.featureText}>{feat}</span>
+            </div>
+          ))}
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' as const, letterSpacing: 1, marginTop: 8, marginBottom: -4 }}>
+            Always free
+          </div>
+          {['Purine tracking & food database', 'Uric acid & flare logging', '3 AI food scans per day'].map((feat) => (
+            <div key={feat} style={styles.featureRow}>
+              <div style={{ ...styles.featureCheck, background: 'rgba(255,255,255,0.2)' }}>
+                <CheckIcon size={12} color="#fff" />
+              </div>
+              <span style={{ ...styles.featureText, color: 'rgba(255,255,255,0.5)' }}>{feat}</span>
             </div>
           ))}
         </div>

@@ -5,7 +5,7 @@ import { AppShell } from "./AppShell";
 export const metadata: Metadata = {
   title: "GoutCare — AI-Powered Gout Management",
   description:
-    "Manage gout with AI food scanning, purine tracking, uric acid monitoring, and personalized dietary guidance.",
+    "Manage gout with purine tracking, uric acid monitoring, and flare logging. Unlimited AI food scans available with subscription.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

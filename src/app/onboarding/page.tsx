@@ -70,7 +70,7 @@ export default function OnboardingPage() {
         </div>
 
         <h1 style={styles.heading}>Welcome to GoutCare</h1>
-        <p style={styles.sub}>Your AI-powered companion for gout management</p>
+        <p style={styles.sub}>Track purines, log flares, and monitor uric acid for free. Subscribe for unlimited AI food scans.</p>
 
         {/* Plan Cards */}
         <div style={styles.plans}>

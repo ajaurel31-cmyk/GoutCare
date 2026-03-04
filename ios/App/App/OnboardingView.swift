@@ -43,12 +43,25 @@ struct OnboardingView: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    // Features
-                    VStack(spacing: 14) {
-                        FeatureRow(icon: "camera.fill", color: GC.accent, text: "AI-powered food scanning")
-                        FeatureRow(icon: "chart.line.uptrend.xyaxis", color: GC.success, text: "Track uric acid & flares")
+                    // Free features
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("FREE FEATURES")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(GC.textTertiary)
+                            .padding(.bottom, 4)
                         FeatureRow(icon: "fork.knife", color: GC.orange, text: "600+ food purine database")
+                        FeatureRow(icon: "chart.line.uptrend.xyaxis", color: GC.success, text: "Track uric acid & flares")
                         FeatureRow(icon: "bell.fill", color: GC.purple, text: "Smart medication reminders")
+                        FeatureRow(icon: "camera.fill", color: GC.textSecondary, text: "3 AI food scans per day")
+                    }
+
+                    // Premium features
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("WITH SUBSCRIPTION")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(GC.accent)
+                            .padding(.bottom, 4)
+                        FeatureRow(icon: "camera.fill", color: GC.accent, text: "Unlimited AI food scanning")
                         FeatureRow(icon: "doc.text.fill", color: GC.cyan, text: "PDF health reports for your doctor")
                     }
 
@@ -239,20 +252,32 @@ struct PaywallView: View {
                         .foregroundColor(GC.accent)
 
                     VStack(spacing: 8) {
-                        Text("Unlock GoutCare")
+                        Text("Unlock GoutCare Premium")
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(GC.text)
-                        Text("Subscribe to access all features")
+                        Text("Subscription required for premium features")
                             .font(.system(size: 15))
                             .foregroundColor(GC.textSecondary)
                     }
 
-                    VStack(spacing: 14) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("PREMIUM FEATURES (SUBSCRIPTION REQUIRED)")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(GC.accent)
+                            .padding(.bottom, 4)
                         FeatureRow(icon: "camera.fill", color: GC.accent, text: "Unlimited AI food scanning")
-                        FeatureRow(icon: "chart.line.uptrend.xyaxis", color: GC.success, text: "Full health tracking & trends")
-                        FeatureRow(icon: "bolt.fill", color: GC.orange, text: "Flare analysis & insights")
-                        FeatureRow(icon: "bell.fill", color: GC.purple, text: "Smart reminders")
                         FeatureRow(icon: "doc.text.fill", color: GC.cyan, text: "PDF health reports for your doctor")
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("ALWAYS FREE")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(GC.textTertiary)
+                            .padding(.bottom, 4)
+                        FeatureRow(icon: "fork.knife", color: GC.orange, text: "Purine tracking & food database")
+                        FeatureRow(icon: "chart.line.uptrend.xyaxis", color: GC.success, text: "Uric acid & flare logging")
+                        FeatureRow(icon: "bell.fill", color: GC.purple, text: "Medication & hydration reminders")
+                        FeatureRow(icon: "camera.fill", color: GC.textSecondary, text: "3 free AI food scans per day")
                     }
 
                     VStack(spacing: 12) {

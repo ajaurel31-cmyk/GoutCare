@@ -321,7 +321,7 @@ struct SettingsView: View {
                         Text("Version 1.0")
                             .font(.system(size: 13))
                             .foregroundColor(GC.textSecondary)
-                        Text("AI-powered gout management. Track purines, scan foods, monitor uric acid, and manage flares.")
+                        Text("AI-powered gout management. Track purines, scan foods, monitor uric acid, and manage flares. Unlimited AI food scans and PDF health reports require a subscription.")
                             .font(.system(size: 13))
                             .foregroundColor(GC.textTertiary)
                             .padding(.top, 4)
