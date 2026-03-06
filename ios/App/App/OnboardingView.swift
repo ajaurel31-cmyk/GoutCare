@@ -243,6 +243,7 @@ struct OnboardingView: View {
 // MARK: - Paywall
 struct PaywallView: View {
     @EnvironmentObject var store: DataStore
+    @Environment(\.dismiss) private var dismiss
     @State private var selectedPlan = "monthly"
     @State private var isPurchasing = false
     @State private var isRestoring = false
@@ -420,7 +421,9 @@ struct PaywallView: View {
 
             let success = await store.purchaseSubscription(product)
             isPurchasing = false
-            if !success, let err = storeManager.purchaseError {
+            if success {
+                dismiss()
+            } else if let err = storeManager.purchaseError {
                 errorMessage = err
             }
         }
@@ -432,7 +435,9 @@ struct PaywallView: View {
         Task { @MainActor in
             await store.restorePurchases()
             isRestoring = false
-            if !store.isSubscribed {
+            if store.isSubscribed {
+                dismiss()
+            } else {
                 errorMessage = "No active subscription found for this Apple ID."
             }
         }
