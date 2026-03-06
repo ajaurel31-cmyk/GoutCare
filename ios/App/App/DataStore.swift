@@ -658,6 +658,8 @@ class DataStore: ObservableObject {
 
     func clearAllData() {
         for key in defaults.dictionaryRepresentation().keys where key.hasPrefix("gc_") {
+            // Preserve scan counts so users can't reset free scan limits by clearing data
+            if key.hasPrefix("gc_scans_") { continue }
             defaults.removeObject(forKey: key)
         }
         profile = UserProfile()
