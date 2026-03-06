@@ -91,11 +91,6 @@ export default function DashboardPage() {
       return;
     }
 
-    if (!isTrialActive() && !isSubscribed()) {
-      router.replace('/paywall');
-      return;
-    }
-
     setTrialDays(getTrialDaysRemaining());
     refreshData();
     setMounted(true);

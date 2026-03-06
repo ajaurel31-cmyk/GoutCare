@@ -114,6 +114,17 @@ export default function OnboardingPage() {
           <span>{loading ? 'Loading...' : selected === 'monthly' ? 'Start Free Trial' : 'Subscribe Now'}</span>
         </button>
 
+        <button
+          onClick={() => {
+            updateUserProfile({ onboardingComplete: true });
+            router.replace('/');
+          }}
+          disabled={loading}
+          style={styles.skipBtn}
+        >
+          Continue with Free Plan
+        </button>
+
         <p style={styles.cancel}>{disclosureText()}</p>
 
         <div style={styles.legal}>
@@ -217,4 +228,14 @@ const styles: Record<string, React.CSSProperties> = {
   legal: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'center' },
   legalLink: { fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline', cursor: 'pointer' },
   legalSep: { fontSize: 12, color: 'rgba(255,255,255,0.15)' },
+  skipBtn: {
+    background: 'none',
+    border: 'none',
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: 'pointer',
+    padding: '8px 0',
+    marginBottom: 8,
+  },
 };

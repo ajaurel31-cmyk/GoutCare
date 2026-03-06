@@ -8,8 +8,6 @@ struct ContentView: View {
         Group {
             if !store.profile.onboardingComplete {
                 OnboardingView()
-            } else if !store.isSubscribed {
-                PaywallView()
             } else {
                 mainTabView
             }

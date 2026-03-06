@@ -689,7 +689,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-            AI-powered gout management. Track purines, scan foods, monitor uric acid, and manage flares. Unlimited AI food scans and PDF health reports require a subscription.
+            Free gout management: purine tracking, food database, uric acid monitoring, flare logging, and 3 daily AI food scans. Premium subscription required for unlimited AI scans and PDF health reports.
           </p>
           <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
             <Link href="/terms" style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline' }}>Terms of Service</Link>

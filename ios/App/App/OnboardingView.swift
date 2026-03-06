@@ -130,6 +130,15 @@ struct OnboardingView: View {
                 .disabled(isPurchasing || isRestoring)
 
                 Button {
+                    handleSkip()
+                } label: {
+                    Text("Continue with Free Plan")
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .foregroundColor(GC.textSecondary)
+                .disabled(isPurchasing || isRestoring)
+
+                Button {
                     handleRestore()
                 } label: {
                     if isRestoring {
@@ -142,7 +151,7 @@ struct OnboardingView: View {
                     }
                 }
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(GC.textSecondary)
+                .foregroundColor(GC.textTertiary)
                 .disabled(isPurchasing || isRestoring)
 
                 if trialEligible && selectedPlan == "monthly" {
@@ -188,6 +197,10 @@ struct OnboardingView: View {
         .task {
             await storeManager.loadProducts()
         }
+    }
+
+    private func handleSkip() {
+        store.updateProfile { $0.onboardingComplete = true }
     }
 
     private func handleRestore() {

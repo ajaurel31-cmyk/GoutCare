@@ -10,6 +10,7 @@ struct DashboardView: View {
     @State private var showUricAcidLog = false
     @State private var showFlareLog = false
     @State private var isExportingPDF = false
+    @State private var showPaywall = false
 
     private var purinePercent: Double {
         min(Double(dailyLog.totalPurine) / Double(store.profile.purineTarget), 1.5)
@@ -93,8 +94,41 @@ struct DashboardView: View {
                     StatCard(icon: "fork.knife", title: "Foods Today", value: "\(dailyLog.foods.count) items", color: GC.purple)
                 }
 
+                // Upgrade banner for free users
+                if !store.isSubscribed {
+                    Button { showPaywall = true } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 18))
+                                .foregroundColor(.white)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Upgrade to Premium")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.white)
+                                Text("Unlimited AI scans & PDF reports")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.white.opacity(0.8))
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.6))
+                        }
+                        .padding(14)
+                        .background(
+                            LinearGradient(colors: [GC.accent, Color(hex: 0x6366F1)],
+                                           startPoint: .leading, endPoint: .trailing)
+                        )
+                        .cornerRadius(14)
+                    }
+                }
+
                 // PDF Report Promo
                 Button {
+                    guard store.isSubscribed else {
+                        showPaywall = true
+                        return
+                    }
                     guard !isExportingPDF else { return }
                     isExportingPDF = true
                     Task {
@@ -123,9 +157,20 @@ struct DashboardView: View {
                             }
                         }
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("Share Health Report")
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(GC.text)
+                            HStack(spacing: 6) {
+                                Text("Share Health Report")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(GC.text)
+                                if !store.isSubscribed {
+                                    Text("PREMIUM")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(GC.accent)
+                                        .cornerRadius(4)
+                                }
+                            }
                             Text("Export a professional PDF for your doctor")
                                 .font(.system(size: 12))
                                 .foregroundColor(GC.textSecondary)
@@ -206,6 +251,7 @@ struct DashboardView: View {
         .sheet(isPresented: $showWaterLog) { AddWaterSheet(onDone: refresh) }
         .sheet(isPresented: $showUricAcidLog) { AddUricAcidSheet(onDone: refresh) }
         .sheet(isPresented: $showFlareLog) { AddFlareSheet(onDone: refresh) }
+        .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 
     private func refresh() {

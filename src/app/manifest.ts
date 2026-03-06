@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'GoutCare — AI-Powered Gout Management',
     short_name: 'GoutCare',
-    description: 'Manage gout with purine tracking, uric acid monitoring, and flare logging. Unlimited AI food scans available with subscription.',
+    description: 'Free gout management: purine tracking, uric acid monitoring, flare logging, and 3 daily AI food scans. Premium subscription unlocks unlimited AI scans and PDF health reports.',
     start_url: '/',
     display: 'standalone',
     background_color: '#0a0e1a',

@@ -264,6 +264,10 @@ struct SettingsView: View {
                     SectionLabel(text: "Data")
 
                     Button {
+                        guard store.isSubscribed else {
+                            // Show paywall for non-subscribers
+                            return
+                        }
                         guard !isExporting else { return }
                         isExporting = true
                         Task {
@@ -277,7 +281,18 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "doc.text").foregroundColor(GC.accent)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Export Health Report").foregroundColor(GC.text)
+                                HStack(spacing: 6) {
+                                    Text("Export Health Report").foregroundColor(GC.text)
+                                    if !store.isSubscribed {
+                                        Text("PREMIUM")
+                                            .font(.system(size: 9, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(GC.accent)
+                                            .cornerRadius(4)
+                                    }
+                                }
                                 Text("PDF report to share with your doctor")
                                     .font(.system(size: 12))
                                     .foregroundColor(GC.textTertiary)
@@ -321,7 +336,7 @@ struct SettingsView: View {
                         Text("Version 1.0")
                             .font(.system(size: 13))
                             .foregroundColor(GC.textSecondary)
-                        Text("AI-powered gout management. Track purines, scan foods, monitor uric acid, and manage flares. Unlimited AI food scans and PDF health reports require a subscription.")
+                        Text("Free gout management: purine tracking, food database, uric acid monitoring, flare logging, and 3 daily AI food scans. Premium subscription required for unlimited AI scans and PDF health reports.")
                             .font(.system(size: 13))
                             .foregroundColor(GC.textTertiary)
                             .padding(.top, 4)
