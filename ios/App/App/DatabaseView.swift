@@ -58,7 +58,7 @@ struct DatabaseView: View {
                 LazyVStack(spacing: 8) {
                     ForEach(filtered) { food in
                         FoodRow(food: food, isExpanded: expandedId == food.id) {
-                            withAnimation(.spring(response: 0.3)) {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8, blendDuration: 0)) {
                                 expandedId = expandedId == food.id ? nil : food.id
                             }
                         }

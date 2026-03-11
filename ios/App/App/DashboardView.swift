@@ -71,7 +71,7 @@ struct DashboardView: View {
                             RoundedRectangle(cornerRadius: 6)
                                 .fill(statusMessage.1)
                                 .frame(width: min(geo.size.width * CGFloat(purinePercent), geo.size.width), height: 10)
-                                .animation(.spring(response: 0.6), value: purinePercent)
+                                .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0), value: purinePercent)
                         }
                     }
                     .frame(height: 10)
