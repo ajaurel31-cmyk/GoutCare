@@ -8,6 +8,7 @@ struct SettingsView: View {
     @State private var showPrivacy = false
     @State private var showTerms = false
     @State private var showEULA = false
+    @State private var showCitations = false
     @State private var selectedTheme: AppTheme = .dark
 
     var body: some View {
@@ -362,6 +363,18 @@ struct SettingsView: View {
                             }
                         }
                         .padding(.top, 8)
+
+                        Button { showCitations = true } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "doc.text.magnifyingglass")
+                                    .font(.system(size: 12))
+                                Text("Medical Sources & Citations")
+                                    .font(.system(size: 12, weight: .medium))
+                            }
+                            .foregroundColor(GC.accent)
+                            .underline()
+                        }
+                        .padding(.top, 4)
                     }
                     .card()
                 }
@@ -377,6 +390,18 @@ struct SettingsView: View {
         .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
         .sheet(isPresented: $showTerms) { TermsOfServiceView() }
         .sheet(isPresented: $showEULA) { EULAView() }
+        .sheet(isPresented: $showCitations) {
+            NavigationStack {
+                MedicalCitationsView()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { showCitations = false }
+                                .foregroundColor(GC.accent)
+                        }
+                    }
+                    .toolbarColorScheme(.dark, for: .navigationBar)
+            }
+        }
         .alert("Clear All Data?", isPresented: $showClearConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Clear", role: .destructive) { store.clearAllData() }

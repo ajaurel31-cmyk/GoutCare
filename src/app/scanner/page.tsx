@@ -14,6 +14,7 @@ import { isSubscribed, isTrialActive } from '@/lib/subscription';
 import { FREE_SCAN_LIMIT } from '@/lib/constants';
 import { getToday } from '@/lib/utils';
 import type { ScanResult } from '@/lib/types';
+import { MedicalDisclaimerFooter } from '@/components/MedicalCitations';
 
 type ScanState = 'idle' | 'preview' | 'analyzing' | 'results' | 'error';
 
@@ -505,6 +506,8 @@ export default function ScannerPage() {
               )}
             </button>
           </div>
+
+          <MedicalDisclaimerFooter />
         </>
       )}
 

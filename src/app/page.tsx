@@ -28,6 +28,7 @@ import WaterLogModal from '@/components/WaterLogModal';
 import UricAcidLogModal from '@/components/UricAcidLogModal';
 import FlareLogModal from '@/components/FlareLogModal';
 import FoodLogModal from '@/components/FoodLogModal';
+import { MedicalDisclaimerFooter } from '@/components/MedicalCitations';
 
 type ModalType = 'water' | 'uricAcid' | 'flare' | 'food' | null;
 
@@ -278,6 +279,8 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      <MedicalDisclaimerFooter />
 
       {/* ── Modals ──────────────────────────────────────────────── */}
       {activeModal === 'water' && (

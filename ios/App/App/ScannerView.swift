@@ -297,6 +297,8 @@ struct ResultView: View {
 
             Button("Scan Again", action: onScanAgain)
                 .buttonStyle(SecondaryButtonStyle())
+
+            MedicalDisclaimerBanner()
         }
         .card()
     }

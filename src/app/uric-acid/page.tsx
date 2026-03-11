@@ -16,6 +16,7 @@ import type { UricAcidReading, GoutFlare } from '@/lib/types';
 
 import UricAcidLogModal from '@/components/UricAcidLogModal';
 import FlareLogModal from '@/components/FlareLogModal';
+import { MedicalDisclaimerFooter } from '@/components/MedicalCitations';
 
 type Tab = 'uricAcid' | 'flares';
 type ModalType = 'uricAcid' | 'flare' | null;
@@ -360,6 +361,8 @@ export default function TrackerPage() {
           </div>
         </>
       )}
+
+      <MedicalDisclaimerFooter />
 
       {/* FAB */}
       <button className="fab" onClick={() => setActiveModal(tab === 'uricAcid' ? 'uricAcid' : 'flare')} aria-label={tab === 'uricAcid' ? 'Add uric acid reading' : 'Log flare'}>

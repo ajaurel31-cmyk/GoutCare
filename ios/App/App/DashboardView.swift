@@ -210,6 +210,9 @@ struct DashboardView: View {
                     }
                 }
 
+                // Medical disclaimer
+                MedicalDisclaimerBanner()
+
                 // Today's Foods
                 if !dailyLog.foods.isEmpty {
                     VStack(spacing: 10) {

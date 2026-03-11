@@ -95,6 +95,8 @@ struct UricAcidTab: View {
                         }
                     }
                 }
+
+                MedicalDisclaimerBanner()
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 120)

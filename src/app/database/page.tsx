@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { SearchIcon, AlertIcon } from '@/components/icons';
 import { purineDatabase } from '@/lib/purine-database';
 import type { FoodItem, PurineCategory } from '@/lib/types';
+import { MedicalCitationsBanner } from '@/components/MedicalCitations';
 
 const ALL_CATEGORIES: PurineCategory[] = [
   'Fruits', 'Vegetables', 'Grains', 'Dairy', 'Meats', 'Seafood',
@@ -229,6 +230,8 @@ export default function DatabasePage() {
           ))}
         </div>
       </div>
+
+      <MedicalCitationsBanner />
     </div>
   );
 }

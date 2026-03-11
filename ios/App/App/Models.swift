@@ -461,6 +461,61 @@ struct Constants {
     static let uricAcidTarget = 6.0
 }
 
+// MARK: - Medical Citations
+struct MedicalCitation: Identifiable {
+    let id: String
+    let title: String
+    let url: String
+    let description: String
+}
+
+let medicalCitations: [MedicalCitation] = [
+    MedicalCitation(
+        id: "acr-2020",
+        title: "American College of Rheumatology Guidelines for Management of Gout (2020)",
+        url: "https://doi.org/10.1002/acr.24180",
+        description: "Uric acid targets, medication guidelines, and flare management"
+    ),
+    MedicalCitation(
+        id: "purine-tables",
+        title: "Kaneko K, et al. \"Total Purine and Purine Base Content of Common Foodstuffs.\" Biol Pharm Bull. 2014;37(5):709-721",
+        url: "https://doi.org/10.1248/bpb.b13-00967",
+        description: "Purine content data for food database"
+    ),
+    MedicalCitation(
+        id: "choi-2004",
+        title: "Choi HK, et al. \"Purine-Rich Foods, Dairy and Protein Intake, and the Risk of Gout in Men.\" N Engl J Med. 2004;350(11):1093-1103",
+        url: "https://doi.org/10.1056/NEJMoa035700",
+        description: "Dietary risk factors for gout, including high-purine foods and protective effects of dairy"
+    ),
+    MedicalCitation(
+        id: "neogi-2011",
+        title: "Neogi T. \"Gout.\" N Engl J Med. 2011;364(5):443-452",
+        url: "https://doi.org/10.1056/NEJMcp1001124",
+        description: "Uric acid thresholds, gout pathophysiology, and clinical management"
+    ),
+    MedicalCitation(
+        id: "zhang-2012",
+        title: "Zhang Y, et al. \"Cherry Consumption and Decreased Risk of Recurrent Gout Attacks.\" Arthritis Rheum. 2012;64(12):4004-4011",
+        url: "https://doi.org/10.1002/art.34677",
+        description: "Anti-inflammatory benefits of cherries for gout patients"
+    ),
+    MedicalCitation(
+        id: "choi-2007",
+        title: "Choi HK, Curhan G. \"Coffee, Tea, and Caffeine Consumption and Serum Uric Acid Level.\" Arthritis Rheum. 2007;57(5):816-821",
+        url: "https://doi.org/10.1002/art.22762",
+        description: "Protective effects of coffee consumption on uric acid levels"
+    ),
+    MedicalCitation(
+        id: "dalbeth-2019",
+        title: "Dalbeth N, et al. \"Gout.\" Lancet. 2016;388(10055):2039-2052",
+        url: "https://doi.org/10.1016/S0140-6736(16)00346-9",
+        description: "Comprehensive review of gout management, hydration, and lifestyle modifications"
+    ),
+]
+
+let medicalDisclaimerShort = "Purine values and health information are based on published medical research. This app is not a substitute for professional medical advice. Always consult your healthcare provider."
+
 // MARK: - Helpers
 extension Date {
     var dateKey: String {

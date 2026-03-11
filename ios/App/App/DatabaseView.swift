@@ -64,11 +64,12 @@ struct DatabaseView: View {
                         }
                     }
                 }
+                    MedicalDisclaimerBanner()
+                        .padding(.top, 16)
+                }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 120)
             }
-
-            // Purine legend at bottom is inside scroll
         }
         .background(GC.bg.ignoresSafeArea())
     }
