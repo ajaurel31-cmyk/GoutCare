@@ -201,6 +201,7 @@ struct ResultView: View {
     let onScanAgain: () -> Void
 
     var body: some View {
+        VStack(spacing: 16) {
         VStack(alignment: .leading, spacing: 16) {
             // Foods identified
             HStack {
@@ -297,10 +298,11 @@ struct ResultView: View {
 
             Button("Scan Again", action: onScanAgain)
                 .buttonStyle(SecondaryButtonStyle())
-
-            MedicalDisclaimerBanner()
         }
         .card()
+
+        MedicalDisclaimerBanner()
+        }
     }
 }
 
