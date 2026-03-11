@@ -63,7 +63,6 @@ struct DatabaseView: View {
                             }
                         }
                     }
-                }
                     MedicalDisclaimerBanner()
                         .padding(.top, 16)
                 }
